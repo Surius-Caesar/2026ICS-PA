@@ -152,7 +152,7 @@ static struct {
   { "p", "Evaluate expression", cmd_p},
   { "x", "Scan the memory", cmd_x},
   { "w", "Set a watchpoint", cmd_w},
-  { "d", "Delete a watchpoint",cmd_d}
+  { "d", "Delete a watchpoint",cmd_d},
   {NULL,NULL,NULL}//the symbol of end
    /* TODO: Add more commands */
 

@@ -7,7 +7,8 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ
+  TK_NOTYPE = 256, TK_EQ,
+  TK_NUM
 
   /* TODO: Add more token types */
 
@@ -22,8 +23,14 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {" +", TK_NOTYPE},    // spaces
+  {" +", TK_NOTYPE},    // space
   {"\\+", '+'},         // plus
+  {"-", '-'},           // minus
+  {"\\*", '*'},         // multiplication
+  {"/", '/'},           // divide
+  {"\\(", '('},         // 
+  {"\\)", ')'},         // parathetheses
+  {"[0-9]+", TK_NUM},   // decimal  
   {"==", TK_EQ}         // equal
 };
 
@@ -79,8 +86,37 @@ static bool make_token(char *e) {
          * of tokens, some extra actions should be performed.
          */
 
-        switch (rules[i].token_type) {
-          default: TODO();
+	switch (rules[i].token_type) {
+
+	   // skip space
+          case TK_NOTYPE:
+            break;
+
+          // number
+          case TK_NUM:
+            // overflow
+            if (nr_token >= 32) {
+              printf("too many tokens\n");
+              return false;
+            }
+            tokens[nr_token].type = TK_NUM;
+            // 复制数字字符串，防止溢出
+            if (substr_len >= 32) substr_len = 31;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0';
+            nr_token++;
+            break;
+
+          // 3. + - * / ( ) ==
+          default:
+            if (nr_token >= 32) {
+              printf("too many tokens\n");
+              return false;
+            }
+            // only store types for others
+            tokens[nr_token].type = rules[i].token_type;
+            nr_token++;
+            break;
         }
 
         break;
@@ -96,14 +132,156 @@ static bool make_token(char *e) {
   return true;
 }
 
+// new code
+
+
+// tool 1
+static bool check_parentheses(int p, int q, bool *matched) {
+  // presuppose
+  *matched = true;
+  bool result=true;
+  if (tokens[p].type != '(') return false;
+
+  int balance = 0;
+  for (int i = p; i <= q; i++) {
+    if (tokens[i].type == '(') balance++;
+    if (tokens[i].type == ')') balance--;
+
+    // negative:unlawful
+    if (balance < 0) {
+      *matched = false;
+      return false;
+    }
+    // the unexpected(prematually) 0 means the total expression is not wrapped by a pair of paratheses
+    if(balance == 0 && i < q) {
+    result = false;
+    }
+  }
+
+  // check the Sum
+  if (balance != 0) {
+    *matched = false;
+    return false;
+  }
+  //in the non-denial situation,the result is true. 
+  return result;
+}
+
+// tool 2:judge the priority 
+static int get_priority(int op) {
+  switch (op) {
+    case '+':
+    case '-': return 1;
+    case '*':
+    case '/': return 2;
+    default: return 0; // not an op
+  }
+}
+
+// tool 3: find the core opration
+static int find_main_op(int p, int q) {
+  int main_op_pos = p;
+  int min_priority = 100;  // presetting
+  int balance = 0;         // layers of paratheses
+
+  for (int i = p; i <= q; i++) {
+    int type = tokens[i].type;
+
+    // not care about the op in paratheses
+    if (type == '(') balance++;
+    if (type == ')') balance--;
+    if (balance != 0) continue;
+
+    int prio = get_priority(type);
+    if (prio == 0) continue; 
+
+    // lower priority means new main op.
+    // the same priority means the right should be new main op.
+    if (prio <= min_priority) {
+      min_priority = prio;
+      main_op_pos = i;
+    }
+  }
+
+  return main_op_pos;
+}
+
+static uint32_t eval(int p, int q, bool *success) {
+  if (p > q) {
+    // bad expression
+    *success = false;
+    return 0;
+  }
+
+  if (p == q) {
+    // single token
+    if (tokens[p].type != TK_NUM) {
+      *success = false;
+      return 0;
+    }
+    // transformed to number
+    return (uint32_t)atoi(tokens[p].str);
+  }
+
+  bool matched;
+  if (check_parentheses(p, q, &matched)) {
+    return eval(p + 1, q - 1, success);
+  }//here we strip the parentheses
+
+  if (!matched) {
+    // unmatched situation
+    *success = false;
+    return 0;
+  }
+
+  // divide and conquer
+  int op = find_main_op(p, q);
+  uint32_t val1 = eval(p, op - 1, success);
+  uint32_t val2 = eval(op + 1, q, success);
+
+  if (!*success) return 0;
+
+  // calculation
+  switch (tokens[op].type) {
+    case '+': return val1 + val2;
+    case '-': return val1 - val2;
+    case '*': return val1 * val2;
+    case '/': 
+      if (val2 == 0) {
+        *success = false;
+        return 0;
+      }
+      return val1 / val2;
+
+    default:
+      assert(0);
+  }
+}
+
+// the final external interface
 uint32_t expr(char *e, bool *success) {
+  *success = true;
+
+  // analysis of morphology
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
 
-  /* TODO: Insert codes to evaluate the expression. */
-  TODO();
-
-  return 0;
+  // recursion
+  return eval(0, nr_token - 1, success);
 }
+
+
+
+//uint32_t expr(char *e, bool *success) {
+//  if (!make_token(e)) {
+//    *success = false;
+//    return 0;
+//  }
+//
+//  /* TODO: Insert codes to evaluate the expression. */
+//  TODO();
+//
+//  return 0;
+//}

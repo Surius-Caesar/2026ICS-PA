@@ -38,6 +38,106 @@ static int cmd_q(char *args) {
 
 static int cmd_help(char *args);
 
+static int cmd_si(char *args) {
+    int n = 1; //default
+
+    // if there is a parmeter
+    if (args != NULL) {
+        sscanf(args, "%d", &n);  //"5"to 5
+    }
+
+    cpu_exec(n);  //执行 n 条指令
+    return 0;
+}
+
+static int cmd_info(char *args) {
+    // the error
+    if (args == NULL) {
+        printf("Usage: info r (register) | info w (watchpoint)\n");
+        return 0;
+    }
+
+    // r
+    if (strcmp(args, "r") == 0) {
+        printf("eax: 0x%08x\n", cpu.eax);
+        printf("ecx: 0x%08x\n", cpu.ecx);
+        printf("edx: 0x%08x\n", cpu.edx);
+        printf("ebx: 0x%08x\n", cpu.ebx);
+        printf("esp: 0x%08x\n", cpu.esp);
+        printf("ebp: 0x%08x\n", cpu.ebp);
+        printf("esi: 0x%08x\n", cpu.esi);
+        printf("edi: 0x%08x\n", cpu.edi);
+        printf("eip: 0x%08x\n", cpu.eip);
+    }
+    // w
+    else if (strcmp(args, "w") == 0) {
+        wp_display();  // 调用监视点打印函数
+    }
+
+    return 0;
+}
+
+static int cmd_p(char *args) {
+    if (args == NULL) {
+        printf("Usage: p EXPR\n");
+        return 0;
+    }
+
+    uint32_t result = expr(args);  
+    printf("0x%08x\n", result);  // 16进制
+
+    return 0;
+}
+
+static int cmd_x(char *args) {
+    char *n_str = strtok(args, " ");    // get N
+    char *addr_expr = strtok(NULL, ""); // get the expression of the adderss
+
+    if (n_str == NULL || addr_expr == NULL) {
+	printf("Usage: x N EXPR\n");
+        return 0;
+    }
+	//exception handling
+    int n = atoi(n_str);                  // transform N
+    uint32_t addr = expr(addr_expr);      
+
+    for (int i = 0; i < n; i++) {
+        if (i % 4 == 0) printf("\n0x%08x:", addr + i*4); // output the basic address at the beginning of every line
+        uint32_t data = pmem_read(addr + i*4, 4);  // 4 byte one time
+        printf(" 0x%08x", data);
+    }
+    printf("\n");
+
+    return 0;
+}
+
+static int cmd_w(char *args) {
+    if (args == NULL) {
+        printf("Usage: w EXPR\n");
+        return 0;
+    }
+
+    uint32_t addr = expr(args);  // get the adderss
+    int num = wp_new(addr);      // new wachtpoint
+    printf("Watchpoint %d: 0x%08x\n", num, addr);
+
+    return 0;
+}
+
+static int cmd_d(char *args) {
+    if (args == NULL) {
+        printf("Usage: d N\n");
+        return 0;
+    }
+
+    int n;
+    sscanf(args, "%d", &n);  // get the serial number
+    wp_remove(n);            // delete
+
+    return 0;
+}
+
+
 static struct {
   char *name;
   char *description;
@@ -46,8 +146,15 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-
-  /* TODO: Add more commands */
+  // new commands
+  { "si", "Single step", cmd_si },
+  { "info", "Print information of the program", cmd_info },
+  { "p", "Evaluate expression", cmd_p},
+  { "x", "Scan the memory", cmd_x},
+  { "w", "Set a watchpoint", cmd_w},
+  { "d", "Delete a watchpoint",cmd_d}
+  {NULL,NULL,NULL}//the symbol of end
+   /* TODO: Add more commands */
 
 };
 

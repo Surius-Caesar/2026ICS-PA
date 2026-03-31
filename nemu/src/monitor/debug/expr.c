@@ -7,8 +7,15 @@
 #include <regex.h>
 
 enum {
-  TK_NOTYPE = 256, TK_EQ,
-  TK_NUM
+  TK_NOTYPE = 256,   // space
+  TK_EQ,             // Operator ==
+  TK_NE,             // Operator !=
+  TK_AND,            // Operator &&
+  TK_NUM,            // Decimal number (123)
+  TK_HEX,            // Hex number (0x123)
+  TK_REG,            // Register name ($eax)
+  TK_DEREF           // Pointer dereference (*expr)
+};
 
   /* TODO: Add more token types */
 
@@ -23,15 +30,19 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {" +", TK_NOTYPE},    // space
-  {"\\+", '+'},         // plus
-  {"-", '-'},           // minus
-  {"\\*", '*'},         // multiplication
-  {"/", '/'},           // divide
-  {"\\(", '('},         // 
-  {"\\)", ')'},         // parathetheses
-  {"[0-9]+", TK_NUM},   // decimal  
-  {"==", TK_EQ}         // equal
+  {" +", TK_NOTYPE},                 // space
+  {"0x[0-9a-fA-F]+", TK_HEX},        // Hexadecimal number
+  {"[0-9]+", TK_NUM},                // decimal
+  {"\\$[a-zA-Z0-9]+", TK_REG},       // register 
+  {"\\+", '+'},                      // Plus
+  {"-", '-'},                        // Minus / Negation
+  {"\\*", '*'},                      // Multiply / Deref
+  {"/", '/'},                        // Divide
+  {"\\(", '('},                      // Left parenthesis
+  {"\\)", ')'},                      // Right parenthesis
+  {"==", TK_EQ},                     // Equal
+  {"!=", TK_NE},                     // Not equal
+  {"&&", TK_AND}                     // Logical and
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -85,13 +96,10 @@ static bool make_token(char *e) {
          * to record the token in the array `tokens'. For certain types
          * of tokens, some extra actions should be performed.
          */
-
 	switch (rules[i].token_type) {
-
 	   // skip space
           case TK_NOTYPE:
             break;
-
           // number
           case TK_NUM:
             // overflow
@@ -107,7 +115,21 @@ static bool make_token(char *e) {
             nr_token++;
             break;
 
-          // 3. + - * / ( ) ==
+	    case TK_HEX:
+            case TK_REG:
+            // Store hex number or register token
+            if (nr_token >= 32) {
+              printf("too many tokens\n");
+              return false;
+            }
+            tokens[nr_token].type = rules[i].token_type;
+            if (substr_len >= 32) substr_len = 31;
+            strncpy(tokens[nr_token].str, substr_start, substr_len);
+            tokens[nr_token].str[substr_len] = '\0';
+            nr_token++;
+            break;
+
+          //  + - * / ( ) ==
           default:
             if (nr_token >= 32) {
               printf("too many tokens\n");
@@ -118,7 +140,6 @@ static bool make_token(char *e) {
             nr_token++;
             break;
         }
-
         break;
       }
     }
@@ -167,34 +188,37 @@ static bool check_parentheses(int p, int q, bool *matched) {
   return result;
 }
 
-// tool 2:judge the priority 
+// Return operator priority (higher value = higher priority)
 static int get_priority(int op) {
   switch (op) {
-    case '+':
-    case '-': return 1;
+    case TK_DEREF:  return 4;   // Highest: pointer dereference
     case '*':
-    case '/': return 2;
-    default: return 0; // not an op
+    case '/':       return 3;   // Multiply / Divide
+    case '+':
+    case '-':       return 2;   // Add / Subtract
+    case TK_EQ:
+    case TK_NE:     return 1;   // Equality check
+    case TK_AND:    return 0;   // Lowest: logical AND
+    default:        return -1;  // Not an operator
   }
 }
 
-// tool 3: find the core opration
+// Find the main operator (lowest priority outside parentheses)
 static int find_main_op(int p, int q) {
   int main_op_pos = p;
-  int min_priority = 100;  // presetting
-  int balance = 0;         // layers of paratheses
+  int min_priority = 100; // presetting
+  int balance = 0; // layers of parentheses
 
   for (int i = p; i <= q; i++) {
     int type = tokens[i].type;
 
-    // not care about the op in paratheses
+    // Skip operators inside parentheses
     if (type == '(') balance++;
     if (type == ')') balance--;
     if (balance != 0) continue;
 
     int prio = get_priority(type);
-    if (prio == 0) continue; 
-
+    if (prio < 0) continue;
     // lower priority means new main op.
     // the same priority means the right should be new main op.
     if (prio <= min_priority) {
@@ -202,9 +226,9 @@ static int find_main_op(int p, int q) {
       main_op_pos = i;
     }
   }
-
   return main_op_pos;
 }
+
 
 static uint32_t eval(int p, int q, bool *success) {
   if (p > q) {
@@ -213,14 +237,40 @@ static uint32_t eval(int p, int q, bool *success) {
     return 0;
   }
 
-  if (p == q) {
-    // single token
-    if (tokens[p].type != TK_NUM) {
-      *success = false;
-      return 0;
+    // Handle unary negation: -expr
+  if (tokens[p].type == '-') {
+    bool is_unary = true;
+    if (p > 0) {
+      int t = tokens[p - 1].type;
+      // Not unary if previous token is number/register/')'
+      if (t == TK_NUM || t == TK_HEX || t == TK_REG || t == ')')
+        is_unary = false;
     }
-    // transformed to number
-    return (uint32_t)atoi(tokens[p].str);
+    if (is_unary) {
+      uint32_t val = eval(p + 1, q, success);
+      // 2's complement negation for uint32_t
+      return (~val) + 1;
+    }
+  }
+
+  // Handle pointer dereference: *expr
+  if (tokens[p].type == TK_DEREF) {
+    uint32_t addr = eval(p + 1, q, success);
+    if (!*success) return 0;
+    // Read 4 bytes from virtual address
+    return vaddr_read(addr, 4);
+  }
+
+
+  if (p == q) {
+    switch (tokens[p].type) {
+      case TK_NUM: return (uint32_t)atoi(tokens[p].str);
+      case TK_HEX: return (uint32_t)strtoul(tokens[p].str, NULL, 16);
+      case TK_REG: return reg_lookup(tokens[p].str + 1); // Skip '$'
+      default:
+        *success = false;
+        return 0;
+    }
   }
 
   bool matched;
@@ -252,6 +302,12 @@ static uint32_t eval(int p, int q, bool *success) {
         return 0;
       }
       return val1 / val2;
+    case TK_EQ: 
+    return (val1 == val2) ? 1 : 0;
+    case TK_NE: 
+    return (val1 != val2) ? 1 : 0;
+    case TK_AND:
+    return (val1 && val2) ? 1 : 0;
 
     default:
       assert(0);
@@ -266,6 +322,23 @@ uint32_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
+  }
+  
+  // Distinguish '*' as dereference or multiply
+  int i;
+  for (i = 0; i < nr_token; i++) {
+    if (tokens[i].type == '*' && (i == 0 ||
+        tokens[i-1].type == '+' ||
+        tokens[i-1].type == '-' ||
+        tokens[i-1].type == '*' ||
+        tokens[i-1].type == '/' ||
+        tokens[i-1].type == '(' ||
+        tokens[i-1].type == TK_EQ ||
+        tokens[i-1].type == TK_NE ||
+        tokens[i-1].type == TK_AND)) {
+      // Mark as pointer dereference
+      tokens[i].type = TK_DEREF;
+    }
   }
 
   // recursion

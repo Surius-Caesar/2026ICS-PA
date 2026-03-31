@@ -71,7 +71,7 @@ static int cmd_info(char *args) {
     }
     // w
     else if (strcmp(args, "w") == 0) {
-        wp_display();  // 调用监视点打印函数
+        wp_display();  // call the watchpoint print function
     }
 
     return 0;
@@ -82,9 +82,13 @@ static int cmd_p(char *args) {
         printf("Usage: p EXPR\n");
         return 0;
     }
-
-    uint32_t result = expr(args);  
-    printf("0x%08x\n", result);  // 16进制
+    bool success;
+    uint32_t result = expr(args,&success);
+    if(!success){
+	  printf("Invalid experession!\n");  
+	  return 0;
+    }
+    printf("0x%08x\n", result);  // 16 number system
 
     return 0;
 }
@@ -99,11 +103,17 @@ static int cmd_x(char *args) {
     }
 	//exception handling
     int n = atoi(n_str);                  // transform N
-    uint32_t addr = expr(addr_expr);      
+    bool success;
+    uint32_t addr = expr(addr_expr,&success);      
 
+    if(!success){
+    printf("Invalid register address!\n");
+    return 0;
+    }
+    
     for (int i = 0; i < n; i++) {
         if (i % 4 == 0) printf("\n0x%08x:", addr + i*4); // output the basic address at the beginning of every line
-        uint32_t data = pmem_read(addr + i*4, 4);  // 4 byte one time
+        uint32_t data = vaddr_read(addr + i*4, 4);  // 4 byte one time
         printf(" 0x%08x", data);
     }
     printf("\n");
@@ -116,8 +126,12 @@ static int cmd_w(char *args) {
         printf("Usage: w EXPR\n");
         return 0;
     }
-
-    uint32_t addr = expr(args);  // get the adderss
+    bool success;
+    uint32_t addr = expr(args,&success);  // get the adderss
+    if(!success){
+    printf("Invalid address!");
+    return 0;
+    }
     int num = wp_new(addr);      // new wachtpoint
     printf("Watchpoint %d: 0x%08x\n", num, addr);
 

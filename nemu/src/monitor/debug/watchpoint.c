@@ -32,6 +32,8 @@ WP* new_wp(){
 
 
 void free_wp(WP *wp){
+  if(!wp) 
+	  return;
   WP *front=head;
   if(front == wp){
     head=head->next;
@@ -42,6 +44,7 @@ void free_wp(WP *wp){
 	  }; 
   front->next = wp->next;
   };
+  wp->used=false;
   wp->next = free_;
   free_=wp;
 };

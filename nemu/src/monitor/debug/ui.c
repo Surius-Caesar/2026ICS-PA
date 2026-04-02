@@ -125,16 +125,30 @@ static int cmd_w(char *args) {
     if (args == NULL) {
         printf("Usage: w EXPR\n");
         return 0;
-    }
-    bool success;
-    uint32_t addr = expr(args,&success);  // get the adderss
-    if(!success){
-    printf("Invalid address!");
-    return 0;
-    }
-    int num = wp_new(addr);      // new wachtpoint
-    printf("Watchpoint %d: 0x%08x\n", num, addr);
+    };
+    // Get a free watchpoint
+    WP *wp = new_wp();
 
+    // Mark it as used
+    wp->used = true;
+
+    // Save the expression
+    strncpy(wp->expr, args, 127);
+    wp->expr[127] = '\0';
+
+    // Evaluate the initial value
+    bool success;
+    uint32_t val = expr(args, &success);
+    if (!success) {
+        printf("Error: invalid expression\n");
+        wp->used = false;
+        free_wp(wp);
+        return 0;
+    }
+
+    wp->old_val = val;
+
+    printf("Watchpoint %d enabled: %s = 0x%08x\n", wp->NO, args, val);
     return 0;
 }
 

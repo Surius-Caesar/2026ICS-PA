@@ -15,4 +15,13 @@ typedef struct watchpoint {
   char expr[128];           // Expression string of this watchpoint
 } WP;
 
+// for callers
+
+extern WP *head;
+extern WP *free_;
+
+void init_wp_pool(void);
+WP* new_wp(void);
+void free_wp(WP *wp);
+void wp_display(void);
 #endif

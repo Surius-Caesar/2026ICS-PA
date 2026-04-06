@@ -6,6 +6,8 @@
 #include <sys/types.h>
 #include <regex.h>
 
+#include <stdlib.h>
+
 enum {
   TK_NOTYPE = 256,   // space
   TK_EQ,             // Operator ==
@@ -15,7 +17,6 @@ enum {
   TK_HEX,            // Hex number (0x123)
   TK_REG,            // Register name ($eax)
   TK_DEREF           // Pointer dereference (*expr)
-};
 
   /* TODO: Add more token types */
 

@@ -3,8 +3,9 @@
 
 #define NR_WP 32
 
-static WP wp_pool[NR_WP];
-static WP *head, *free_;
+//the "static" of the next 2 line has been deleted,which here are in thr begin.
+WP wp_pool[NR_WP];
+WP *head, *free_;
 
 void init_wp_pool() {
   int i;
@@ -36,7 +37,7 @@ void free_wp(WP *wp){
   WP *front=head;
   if(front == wp){
     head=head->next;
-  };
+  }
   else{ 
 	  while(front->next != wp){
 		  front=front->next;
@@ -47,8 +48,6 @@ void free_wp(WP *wp){
   wp->next = free_;
   free_=wp;
 };
-
-
 
 // the next block is to finish the "info w" command.
 void wp_display(void) {

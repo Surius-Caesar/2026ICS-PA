@@ -30,7 +30,6 @@ WP* new_wp(){
   return cur;
 };
 
-
 void free_wp(WP *wp){
   if(!wp) 
 	  return;
@@ -48,3 +47,21 @@ void free_wp(WP *wp){
   wp->next = free_;
   free_=wp;
 };
+
+
+
+// the next block is to finish the "info w" command.
+void wp_display(void) {
+    printf("Num     Type           Disp Enb Address            What\n");
+
+    WP *p = head;
+    while (p != NULL) {
+        if (p->used) {
+            printf("%-8dwatchpoint    keep y   0x%08x         %s\n",
+                   p->NO,
+                   p->old_val,
+                   p->expr);
+        }
+        p = p->next;
+    }
+}

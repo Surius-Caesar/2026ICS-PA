@@ -158,10 +158,20 @@ static int cmd_d(char *args) {
         return 0;
     }
 
-    int n;
-    sscanf(args, "%d", &n);  // get the serial number
-    wp_remove(n);            // delete
+    int no = atoi(args);
 
+    WP *p = head;
+    while (p != NULL) {
+        if (p->NO == no) {
+            free_wp(p);
+            printf("Watchpoint %d deleted\n", no);
+            return 0;
+        }
+        p = p->next;
+    }
+
+    // if not found
+    printf("Watchpoint %d not found\n", no);
     return 0;
 }
 

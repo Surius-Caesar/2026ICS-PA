@@ -248,7 +248,7 @@ static uint32_t eval(int p, int q, bool *success) {
     }
     if (is_unary) {
       uint32_t val = eval(p + 1, q, success);
-      // 2's complement negation for uint32_t
+      // Two's complement negation for uint32_t
       return (~val) + 1;
     }
   }
@@ -263,14 +263,13 @@ static uint32_t eval(int p, int q, bool *success) {
 
 
   if (p == q) {
-    switch (tokens[p].type) {
-      case TK_NUM: return (uint32_t)atoi(tokens[p].str);
-      case TK_HEX: return (uint32_t)strtoul(tokens[p].str, NULL, 16);
-      case TK_REG: return reg_lookup(tokens[p].str + 1); // Skip '$'
-      default:
-        *success = false;
-        return 0;
+    // single token
+    if (tokens[p].type != TK_NUM) {
+      *success = false;
+      return 0;
     }
+    // transformed to number
+    return (uint32_t)atoi(tokens[p].str);
   }
 
   bool matched;
@@ -302,12 +301,6 @@ static uint32_t eval(int p, int q, bool *success) {
         return 0;
       }
       return val1 / val2;
-    case TK_EQ: 
-    return (val1 == val2) ? 1 : 0;
-    case TK_NE: 
-    return (val1 != val2) ? 1 : 0;
-    case TK_AND:
-    return (val1 && val2) ? 1 : 0;
 
     default:
       assert(0);
@@ -322,23 +315,6 @@ uint32_t expr(char *e, bool *success) {
   if (!make_token(e)) {
     *success = false;
     return 0;
-  }
-  
-  // Distinguish '*' as dereference or multiply
-  int i;
-  for (i = 0; i < nr_token; i++) {
-    if (tokens[i].type == '*' && (i == 0 ||
-        tokens[i-1].type == '+' ||
-        tokens[i-1].type == '-' ||
-        tokens[i-1].type == '*' ||
-        tokens[i-1].type == '/' ||
-        tokens[i-1].type == '(' ||
-        tokens[i-1].type == TK_EQ ||
-        tokens[i-1].type == TK_NE ||
-        tokens[i-1].type == TK_AND)) {
-      // Mark as pointer dereference
-      tokens[i].type = TK_DEREF;
-    }
   }
 
   // recursion

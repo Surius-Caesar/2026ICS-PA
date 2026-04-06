@@ -121,6 +121,7 @@ static int cmd_x(char *args) {
     return 0;
 }
 
+
 static int cmd_w(char *args) {
     if (args == NULL) {
         printf("Usage: w EXPR\n");

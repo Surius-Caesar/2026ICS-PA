@@ -109,7 +109,7 @@ static bool make_token(char *e) {
               return false;
             }
             tokens[nr_token].type = TK_NUM;
-            // 复制数字字符串，防止溢出
+            // 数字字符串，防止溢出
             if (substr_len >= 32) substr_len = 31;
             strncpy(tokens[nr_token].str, substr_start, substr_len);
             tokens[nr_token].str[substr_len] = '\0';
@@ -150,7 +150,19 @@ static bool make_token(char *e) {
       return false;
     }
   }
-
+  // to distinguish the pointer deference
+  for (i = 0; i < nr_token; i++) {
+    if (tokens[i].type == '*') {
+      if (i == 0 ||
+          !(tokens[i-1].type == TK_NUM ||
+            tokens[i-1].type == TK_HEX ||
+            tokens[i-1].type == TK_REG ||
+            tokens[i-1].type == ')'))
+      {
+        tokens[i].type = TK_DEREF;
+      }
+    }
+  }
   return true;
 }
 
@@ -221,8 +233,8 @@ static int find_main_op(int p, int q) {
     int prio = get_priority(type);
     if (prio < 0) continue;
     // lower priority means new main op.
-    // the same priority means the right should be new main op.
-    if (prio <= min_priority) {
+    // the same priority means the left should be new main op.
+    if (prio < min_priority) {
       min_priority = prio;
       main_op_pos = i;
     }
@@ -250,6 +262,7 @@ static uint32_t eval(int p, int q, bool *success) {
     if (is_unary) {
       uint32_t val = eval(p + 1, q, success);
       // Two's complement negation for uint32_t
+      if (!*success) return 0;
       return (~val) + 1;
     }
   }
@@ -264,14 +277,27 @@ static uint32_t eval(int p, int q, bool *success) {
 
 
   if (p == q) {
-    // single token
-    if (tokens[p].type != TK_NUM) {
+      if (tokens[p].type == TK_NUM) {
+      return (uint32_t)atoi(tokens[p].str);
+    } else if (tokens[p].type == TK_HEX) {
+      return (uint32_t)strtoul(tokens[p].str + 2, NULL, 16);
+    } else if (tokens[p].type == TK_REG) {
+      if (!strcmp(tokens[p].str, "$eax")) return cpu.eax;
+      if (!strcmp(tokens[p].str, "$ebx")) return cpu.ebx;
+      if (!strcmp(tokens[p].str, "$ecx")) return cpu.ecx;
+      if (!strcmp(tokens[p].str, "$edx")) return cpu.edx;
+      if (!strcmp(tokens[p].str, "$esp")) return cpu.esp;
+      if (!strcmp(tokens[p].str, "$ebp")) return cpu.ebp;
+      if (!strcmp(tokens[p].str, "$esi")) return cpu.esi;
+      if (!strcmp(tokens[p].str, "$edi")) return cpu.edi;
+      *success = false;
+      return 0;
+    } else {
       *success = false;
       return 0;
     }
-    // transformed to number
-    return (uint32_t)atoi(tokens[p].str);
-  }
+   }
+
 
   bool matched;
   if (check_parentheses(p, q, &matched)) {
@@ -303,8 +329,13 @@ static uint32_t eval(int p, int q, bool *success) {
       }
       return val1 / val2;
 
+    case TK_EQ:  return (val1 == val2) ? 1 : 0;
+    case TK_NE:  return (val1 != val2) ? 1 : 0;
+    case TK_AND: return (val1 && val2) ? 1 : 0;
+    
     default:
-      assert(0);
+	*success=false;	    	
+        assert(0);
   }
 }
 

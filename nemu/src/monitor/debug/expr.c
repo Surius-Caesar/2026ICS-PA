@@ -246,7 +246,7 @@ static int find_main_op(int p, int q) {
     if (prio < 0) continue;
     // lower priority means new main op.
     // the same priority means the left should be new main op.
-    if (prio < min_priority) {
+    if (prio <= min_priority) {
       min_priority = prio;
       main_op_pos = i;
     }

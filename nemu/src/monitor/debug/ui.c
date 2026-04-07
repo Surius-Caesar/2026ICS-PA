@@ -210,12 +210,12 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   // new commands
-  { "si", "Single step", cmd_si },
-  { "info", "Print information of the program", cmd_info },
-  { "p", "Evaluate expression", cmd_p},
-  { "x", "Scan the memory", cmd_x},
-  { "w", "Set a watchpoint", cmd_w},
-  { "d", "Delete a watchpoint",cmd_d},
+  { "si", "Single step for[N] times,example:si 10", cmd_si },
+  { "info", "Print information of the program,example:\"info r\" for registers,\"info w\"for watchpoints. ", cmd_info },
+  { "p", "Evaluate expression,example:p $eax + 1", cmd_p},
+  { "x", "Scan the memory,example:x 10 $esp,the 10 means continuous 10 bytes will be scanned", cmd_x},
+  { "w", "Set a watchpoint:w *0x2000", cmd_w},
+  { "d", "Delete a watchpoint:d N,the N should be the sequence number instead of expression",cmd_d},
   {NULL,NULL,NULL}//the symbol of end
    /* TODO: Add more commands */
 

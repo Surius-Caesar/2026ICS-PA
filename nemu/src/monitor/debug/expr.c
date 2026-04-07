@@ -229,6 +229,18 @@ static int find_main_op(int p, int q) {
     if (type == '(') balance++;
     if (type == ')') balance--;
     if (balance != 0) continue;
+    // skip the unary \"-\"
+    if (type == '-') {
+    bool is_unary = true;
+    if (i > p) {  
+        int prev = tokens[i-1].type;
+        if (prev == TK_NUM || prev == TK_REG || prev == TK_HEX || prev == ')') {
+            is_unary = false;
+        }
+    }
+    if (is_unary) continue; 
+}
+
 
     int prio = get_priority(type);
     if (prio < 0) continue;

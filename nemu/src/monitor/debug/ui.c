@@ -60,14 +60,38 @@ static int cmd_info(char *args) {
     // r
     if (strcmp(args, "r") == 0) {
         printf("eax: 0x%08x\n", cpu.eax);
+        printf("ebx: 0x%08x\n", cpu.ebx);
         printf("ecx: 0x%08x\n", cpu.ecx);
         printf("edx: 0x%08x\n", cpu.edx);
-        printf("ebx: 0x%08x\n", cpu.ebx);
         printf("esp: 0x%08x\n", cpu.esp);
         printf("ebp: 0x%08x\n", cpu.ebp);
         printf("esi: 0x%08x\n", cpu.esi);
         printf("edi: 0x%08x\n", cpu.edi);
         printf("eip: 0x%08x\n", cpu.eip);
+
+	// 16-bit registers
+        printf("ax: 0x%04x\n", cpu.gpr[0]._16);
+        printf("cx: 0x%04x\n", cpu.gpr[1]._16);
+        printf("dx: 0x%04x\n", cpu.gpr[2]._16);
+        printf("bx: 0x%04x\n", cpu.gpr[3]._16);
+        printf("sp: 0x%04x\n", cpu.gpr[4]._16);
+        printf("bp: 0x%04x\n", cpu.gpr[5]._16);
+        printf("si: 0x%04x\n", cpu.gpr[6]._16);
+        printf("di: 0x%04x\n", cpu.gpr[7]._16);
+
+        // 8-bit low registers
+        printf("al: 0x%02x\n", cpu.gpr[0]._8[0]);
+        printf("cl: 0x%02x\n", cpu.gpr[1]._8[0]);
+        printf("dl: 0x%02x\n", cpu.gpr[2]._8[0]);
+        printf("bl: 0x%02x\n", cpu.gpr[3]._8[0]);
+
+        // 8-bit high registers
+        printf("ah: 0x%02x\n", cpu.gpr[0]._8[1]);
+        printf("ch: 0x%02x\n", cpu.gpr[1]._8[1]);
+        printf("dh: 0x%02x\n", cpu.gpr[2]._8[1]);
+        printf("bh: 0x%02x\n", cpu.gpr[3]._8[1]);
+
+
     }
     // w
     else if (strcmp(args, "w") == 0) {

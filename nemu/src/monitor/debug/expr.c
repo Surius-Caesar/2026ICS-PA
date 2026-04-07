@@ -290,6 +290,7 @@ static uint32_t eval(int p, int q, bool *success) {
       if (!strcmp(tokens[p].str, "$ebp")) return cpu.ebp;
       if (!strcmp(tokens[p].str, "$esi")) return cpu.esi;
       if (!strcmp(tokens[p].str, "$edi")) return cpu.edi;
+      if (!strcmp(tokens[p].str, "$eip")) return cpu.eip;
       *success = false;
       return 0;
     } else {

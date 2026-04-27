@@ -6,13 +6,16 @@ make_EHelper(mov) {
 }
 
 make_EHelper(push) {
-  TODO();
+  //Surius:     PUSH writes operand value onto the stack.
+  rtl_push(&id_dest->val);
 
   print_asm_template1(push);
 }
 
 make_EHelper(pop) {
-  TODO();
+  //Surius:     POP reads a dword from stack into destination.
+  rtl_pop(&t0);
+  operand_write(id_dest, &t0);
 
   print_asm_template1(pop);
 }

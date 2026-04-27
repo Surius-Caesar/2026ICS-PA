@@ -7,7 +7,23 @@ make_EHelper(add) {
 }
 
 make_EHelper(sub) {
-  TODO();
+  //Surius:     SUB computes dest - src and writes back the result.
+  rtl_sub(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+
+  //Surius:     Update ZF/SF from the arithmetic result.
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  //Surius:     CF is set on unsigned borrow.
+  rtl_sltu(&t0, &id_dest->val, &t2);
+  rtl_set_CF(&t0);
+
+  //Surius:     OF is set on signed overflow.
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template2(sub);
 }

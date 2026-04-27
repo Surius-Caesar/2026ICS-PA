@@ -38,7 +38,14 @@ static inline make_DopHelper(SI) {
    *
    op->simm = ???
    */
-  TODO();
+  //Surius:     Decode sign-extended immediate for SI operands.
+  if (op->width == 1) {
+    op->simm = (int32_t)(int8_t)instr_fetch(eip, 1);
+  }
+  else {
+    //Surius:     32-bit immediate keeps its full signed representation.
+    op->simm = (int32_t)instr_fetch(eip, 4);
+  }
 
   rtl_li(&op->val, op->simm);
 

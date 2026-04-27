@@ -41,7 +41,7 @@ struct {
     };
 };
   vaddr_t eip;
-  //Surius:     Keep only flags required by PA2 stage-1.
+  //Surius:     PA2 stage-1 only needs these flag bits.
   union {
     rtlreg_t eflags;
     struct {

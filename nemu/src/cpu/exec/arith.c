@@ -7,18 +7,18 @@ make_EHelper(add) {
 }
 
 make_EHelper(sub) {
-  //Surius:     SUB computes dest - src and writes back the result.
+  //Surius:     First do dest - src, then write result back.
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     Update ZF/SF from the arithmetic result.
+  //Surius:     ZF/SF follow the result bits.
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  //Surius:     CF is set on unsigned borrow.
+  //Surius:     CF means unsigned borrow happened.
   rtl_sltu(&t0, &id_dest->val, &t2);
   rtl_set_CF(&t0);
 
-  //Surius:     OF is set on signed overflow.
+  //Surius:     OF means signed overflow happened.
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);

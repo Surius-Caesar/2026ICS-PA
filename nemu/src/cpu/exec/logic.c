@@ -13,11 +13,11 @@ make_EHelper(and) {
 }
 
 make_EHelper(xor) {
-  //Surius:     XOR computes dest ^ src and writes back.
+  //Surius:     Do xor and write result back.
   rtl_xor(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     XOR updates ZF/SF and clears CF/OF.
+  //Surius:     xor clears CF/OF, but updates ZF/SF.
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);

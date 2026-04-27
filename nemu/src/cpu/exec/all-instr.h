@@ -1,15 +1,15 @@
 #include "cpu/exec.h"
 
 make_EHelper(mov);
-//Surius:     Stage-1 stack helpers for dummy.
+//Surius:     Dummy only needs these stack ops for now.
 make_EHelper(push);
 make_EHelper(pop);
 
-//Surius:     Stage-1 control-flow helpers for dummy.
+//Surius:     Dummy will hit these control-flow ops first.
 make_EHelper(call);
 make_EHelper(ret);
 
-//Surius:     Stage-1 arithmetic/logic helpers for dummy.
+//Surius:     Keep only the arithmetic/logic helpers dummy touches.
 make_EHelper(sub);
 make_EHelper(xor);
 

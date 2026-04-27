@@ -38,12 +38,12 @@ static inline make_DopHelper(SI) {
    *
    op->simm = ???
    */
-  //Surius:     Decode sign-extended immediate for SI operands.
+  //Surius:     SI immediate needs sign extension.
   if (op->width == 1) {
     op->simm = (int32_t)(int8_t)instr_fetch(eip, 1);
   }
   else {
-    //Surius:     32-bit immediate keeps its full signed representation.
+    //Surius:     32-bit immediate can be used as-is.
     op->simm = (int32_t)instr_fetch(eip, 4);
   }
 

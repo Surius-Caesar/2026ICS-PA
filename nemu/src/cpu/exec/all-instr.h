@@ -55,5 +55,9 @@ make_EHelper(nop);
 
 make_EHelper(operand_size);
 
+//Surius: IOE port I/O helpers declared for HAS_IOE.
+make_EHelper(in);
+make_EHelper(out);
+
 make_EHelper(inv);
 make_EHelper(nemu_trap);

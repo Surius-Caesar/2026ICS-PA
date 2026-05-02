@@ -59,5 +59,9 @@ make_EHelper(operand_size);
 make_EHelper(in);
 make_EHelper(out);
 
+//Surius: Rotate helpers for MD5/microbench.
+make_EHelper(rol);
+make_EHelper(ror);
+
 make_EHelper(inv);
 make_EHelper(nemu_trap);

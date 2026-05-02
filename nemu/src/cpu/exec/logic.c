@@ -51,6 +51,36 @@ make_EHelper(or) {
   print_asm_template2(or);
 }
 
+make_EHelper(rol) {
+  //Surius: Rotate left by (src & 0x1f) bits; no flag update needed in NEMU.
+  rtl_andi(&t0, &id_src->val, 0x1f);
+  uint32_t width_bits = id_dest->width * 8;
+  t0 = t0 % width_bits;
+  if (t0 != 0) {
+    rtl_shl(&t1, &id_dest->val, &t0);
+    t2 = width_bits - t0;
+    rtl_shr(&t3, &id_dest->val, &t2);
+    rtl_or(&t1, &t1, &t3);
+    operand_write(id_dest, &t1);
+  }
+  print_asm_template2(rol);
+}
+
+make_EHelper(ror) {
+  //Surius: Rotate right by (src & 0x1f) bits; no flag update needed in NEMU.
+  rtl_andi(&t0, &id_src->val, 0x1f);
+  uint32_t width_bits = id_dest->width * 8;
+  t0 = t0 % width_bits;
+  if (t0 != 0) {
+    rtl_shr(&t1, &id_dest->val, &t0);
+    t2 = width_bits - t0;
+    rtl_shl(&t3, &id_dest->val, &t2);
+    rtl_or(&t1, &t1, &t3);
+    operand_write(id_dest, &t1);
+  }
+  print_asm_template2(ror);
+}
+
 make_EHelper(sar) {
   //Surius:     Arithmetic right shift: sign-extend to 32bit first, then sar.
   rtl_sext(&t2, &id_dest->val, id_dest->width);

@@ -47,8 +47,8 @@ make_group(gp1,
 
   /* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
 make_group(gp2,
-  //Surius:     Group-2 shifts: /4=shl /5=shr /7=sar.
-  EMPTY, EMPTY, EMPTY, EMPTY,
+  //Surius: /0=rol /1=ror /2=rcl(skip) /3=rcr(skip) /4=shl /5=shr /6=shl /7=sar
+  EX(rol), EX(ror), EMPTY, EMPTY,
   EX(shl), EX(shr), EMPTY, EX(sar))
 
   /* 0xf6, 0xf7 */

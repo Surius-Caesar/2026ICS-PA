@@ -52,31 +52,33 @@ make_EHelper(or) {
 }
 
 make_EHelper(rol) {
-  //Surius: Rotate left by (src & 0x1f) bits; no flag update needed in NEMU.
-  rtl_andi(&t0, &id_src->val, 0x1f);
-  uint32_t width_bits = id_dest->width * 8;
-  t0 = t0 % width_bits;
-  if (t0 != 0) {
-    rtl_shl(&t1, &id_dest->val, &t0);
-    t2 = width_bits - t0;
-    rtl_shr(&t3, &id_dest->val, &t2);
-    rtl_or(&t1, &t1, &t3);
-    operand_write(id_dest, &t1);
+  //Surius: Rotate left: shift left by n, OR with shift right by (width-n).
+  uint32_t n = id_src->val & 0x1f;
+  uint32_t wb = id_dest->width * 8;
+  n = n % wb;
+  if (n != 0) {
+    uint32_t v = id_dest->val;
+    uint32_t mask = (wb == 32) ? 0xffffffffu : ((1u << wb) - 1);
+    v &= mask;
+    t2 = (v << n) | (v >> (wb - n));
+    t2 &= mask;
+    operand_write(id_dest, &t2);
   }
   print_asm_template2(rol);
 }
 
 make_EHelper(ror) {
-  //Surius: Rotate right by (src & 0x1f) bits; no flag update needed in NEMU.
-  rtl_andi(&t0, &id_src->val, 0x1f);
-  uint32_t width_bits = id_dest->width * 8;
-  t0 = t0 % width_bits;
-  if (t0 != 0) {
-    rtl_shr(&t1, &id_dest->val, &t0);
-    t2 = width_bits - t0;
-    rtl_shl(&t3, &id_dest->val, &t2);
-    rtl_or(&t1, &t1, &t3);
-    operand_write(id_dest, &t1);
+  //Surius: Rotate right: shift right by n, OR with shift left by (width-n).
+  uint32_t n = id_src->val & 0x1f;
+  uint32_t wb = id_dest->width * 8;
+  n = n % wb;
+  if (n != 0) {
+    uint32_t v = id_dest->val;
+    uint32_t mask = (wb == 32) ? 0xffffffffu : ((1u << wb) - 1);
+    v &= mask;
+    t2 = (v >> n) | (v << (wb - n));
+    t2 &= mask;
+    operand_write(id_dest, &t2);
   }
   print_asm_template2(ror);
 }

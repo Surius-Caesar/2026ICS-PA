@@ -1,13 +1,26 @@
 #include "cpu/exec.h"
 
 make_EHelper(test) {
-  TODO();
+  //Surius:     Test is and without write back.
+  rtl_and(&t2, &id_dest->val, &id_src->val);
+
+  //Surius:     Logic test updates ZF/SF and clears CF/OF.
+  rtl_update_ZFSF(&t2, id_dest->width);
+  rtl_set_CF(&tzero);
+  rtl_set_OF(&tzero);
 
   print_asm_template2(test);
 }
 
 make_EHelper(and) {
-  TODO();
+  //Surius:     Do and and write result.
+  rtl_and(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+
+  //Surius:     Logic op updates ZF/SF and clears CF/OF.
+  rtl_update_ZFSF(&t2, id_dest->width);
+  rtl_set_CF(&tzero);
+  rtl_set_OF(&tzero);
 
   print_asm_template2(and);
 }
@@ -26,7 +39,14 @@ make_EHelper(xor) {
 }
 
 make_EHelper(or) {
-  TODO();
+  //Surius:     Do or and write result.
+  rtl_or(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+
+  //Surius:     Logic op updates ZF/SF and clears CF/OF.
+  rtl_update_ZFSF(&t2, id_dest->width);
+  rtl_set_CF(&tzero);
+  rtl_set_OF(&tzero);
 
   print_asm_template2(or);
 }
@@ -61,7 +81,9 @@ make_EHelper(setcc) {
 }
 
 make_EHelper(not) {
-  TODO();
+  //Surius:     Not only flips bits, flags not changed.
+  rtl_not(&id_dest->val);
+  operand_write(id_dest, &id_dest->val);
 
   print_asm_template1(not);
 }

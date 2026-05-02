@@ -1,7 +1,24 @@
 #include "cpu/exec.h"
 
 make_EHelper(add) {
-  TODO();
+  //Surius:     Do dest + src and write back.
+  rtl_add(&t2, &id_dest->val, &id_src->val);
+  operand_write(id_dest, &t2);
+
+  //Surius:     Update ZF/SF from result.
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  //Surius:     CF means unsigned carry out.
+  rtl_sltu(&t0, &t2, &id_dest->val);
+  rtl_set_CF(&t0);
+
+  //Surius:     OF means signed overflow.
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  rtl_not(&t0);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template2(add);
 }
@@ -29,25 +46,78 @@ make_EHelper(sub) {
 }
 
 make_EHelper(cmp) {
-  TODO();
+  //Surius:     Cmp is like sub but no write back.
+  rtl_sub(&t2, &id_dest->val, &id_src->val);
+
+  //Surius:     Update ZF/SF from compare result.
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  //Surius:     CF means unsigned borrow.
+  rtl_sltu(&t0, &id_dest->val, &t2);
+  rtl_set_CF(&t0);
+
+  //Surius:     OF means signed overflow.
+  rtl_xor(&t0, &id_dest->val, &id_src->val);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template2(cmp);
 }
 
 make_EHelper(inc) {
-  TODO();
+  //Surius:     Inc keeps CF, only update OF/ZF/SF.
+  rtl_addi(&t2, &id_dest->val, 1);
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  rtl_li(&t1, 1);
+  rtl_xor(&t0, &id_dest->val, &t1);
+  rtl_not(&t0);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template1(inc);
 }
 
 make_EHelper(dec) {
-  TODO();
+  //Surius:     Dec keeps CF, only update OF/ZF/SF.
+  rtl_subi(&t2, &id_dest->val, 1);
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  rtl_li(&t1, 1);
+  rtl_xor(&t0, &id_dest->val, &t1);
+  rtl_xor(&t1, &id_dest->val, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template1(dec);
 }
 
 make_EHelper(neg) {
-  TODO();
+  //Surius:     Neg does 0 - dest.
+  rtl_sub(&t2, &tzero, &id_dest->val);
+  operand_write(id_dest, &t2);
+
+  rtl_update_ZFSF(&t2, id_dest->width);
+
+  //Surius:     CF is set when source is not zero.
+  rtl_neq0(&t0, &id_dest->val);
+  rtl_set_CF(&t0);
+
+  //Surius:     OF check from subtract form: (0 ^ src) & (0 ^ res).
+  rtl_xor(&t0, &tzero, &id_dest->val);
+  rtl_xor(&t1, &tzero, &t2);
+  rtl_and(&t0, &t0, &t1);
+  rtl_msb(&t0, &t0, id_dest->width);
+  rtl_set_OF(&t0);
 
   print_asm_template1(neg);
 }

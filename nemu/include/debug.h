@@ -43,3 +43,4 @@ extern FILE* log_fp;
 #define TODO() panic("please implement me")
 
 #endif
+volatile static int dummy;

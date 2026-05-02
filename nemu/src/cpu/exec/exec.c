@@ -53,8 +53,8 @@ make_group(gp2,
 
   /* 0xf6, 0xf7 */
 make_group(gp3,
-  //Surius:     Group-3 unary/imul/div family.
-  IDEX(test_I, test), EX(not), EX(neg), EMPTY,
+  //Surius: /0=test /1=undef /2=not /3=neg /4=mul /5=imul /6=div /7=idiv
+  IDEX(test_I, test), EMPTY, EX(not), EX(neg),
   EX(mul), EX(imul1), EX(div), EX(idiv))
 
   /* 0xfe */

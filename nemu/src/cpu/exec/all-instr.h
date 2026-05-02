@@ -40,6 +40,16 @@ make_EHelper(xor);
 make_EHelper(not);
 make_EHelper(setcc);
 
+//Surius:     Shift helpers added for stage2 shift tests.
+make_EHelper(sar);
+make_EHelper(shl);
+make_EHelper(shr);
+
+//Surius:     Data-mov helpers needed for stage2 leave/cltd/cwtl.
+make_EHelper(leave);
+make_EHelper(cltd);
+make_EHelper(cwtl);
+
 //Surius:     Special helper for one-byte nop.
 make_EHelper(nop);
 

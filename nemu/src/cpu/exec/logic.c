@@ -52,21 +52,34 @@ make_EHelper(or) {
 }
 
 make_EHelper(sar) {
-  TODO();
+  //Surius:     Arithmetic right shift: sign-extend to 32bit first, then sar.
+  rtl_sext(&t2, &id_dest->val, id_dest->width);
+  rtl_andi(&t0, &id_src->val, 0x1f);
+  rtl_sar(&t2, &t2, &t0);
+  operand_write(id_dest, &t2);
+  rtl_update_ZFSF(&t2, id_dest->width);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(sar);
 }
 
 make_EHelper(shl) {
-  TODO();
+  //Surius:     Left shift: mask count to 5 bits, shift, update ZF/SF.
+  rtl_andi(&t0, &id_src->val, 0x1f);
+  rtl_shl(&t2, &id_dest->val, &t0);
+  operand_write(id_dest, &t2);
+  rtl_update_ZFSF(&t2, id_dest->width);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(shl);
 }
 
 make_EHelper(shr) {
-  TODO();
+  //Surius:     Logical right shift: mask count to 5 bits, shift, update ZF/SF.
+  rtl_andi(&t0, &id_src->val, 0x1f);
+  rtl_shr(&t2, &id_dest->val, &t0);
+  operand_write(id_dest, &t2);
+  rtl_update_ZFSF(&t2, id_dest->width);
   // unnecessary to update CF and OF in NEMU
 
   print_asm_template2(shr);

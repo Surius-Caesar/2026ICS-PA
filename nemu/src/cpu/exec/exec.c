@@ -186,12 +186,12 @@ opcode_entry opcode_table [512] = {
   /* 0x9c */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
   /* 0xa0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa4 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xa8 */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul2),
-  /* 0xac */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0xac */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul2), //Surius: 0x0f 0xaf = IMUL r32,r/m32; was wrongly placed at 0xab (0xa8 row slot 4), fixed to 0xaf (0xac row slot 4)
   /* 0xb0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xb4 */	EMPTY, EMPTY, IDEXW(E2G, movzx, 1), IDEXW(E2G, movzx, 2),
-  /* 0xb8 */	EMPTY, EMPTY, IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2),
-  /* 0xbc */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0xb8 */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0xbc */	EMPTY, EMPTY, IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2), //Surius: 0x0f 0xbe/0xbf = MOVSX r32,r/m8/16; was wrongly placed at 0xba/0xbb (0xb8 row slots 3-4), fixed to 0xbe/0xbf (0xbc row slots 3-4)
   /* 0xc0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc8 */	EMPTY, EMPTY, EMPTY, EMPTY,

@@ -8,11 +8,11 @@
 
 struct _RegSet {
   //Surius: Trap frame layout from stack (low address to high address):
-  //Surius: EAX, ECX, EDX, EBX, ESP_old, EBP, ESI, EDI (from pusha)
+  //Surius: EDI, ESI, EBP, ESP_old, EBX, EDX, ECX, EAX (from pusha)
   //Surius: irq, error_code (from vecsys/vecnull)
   //Surius: EIP, CS, EFLAGS (from hardware)
-  uintptr_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
-  int       irq, error_code;
+  uintptr_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+  uintptr_t irq, error_code;
   uintptr_t eip, cs, eflags;
 };
 

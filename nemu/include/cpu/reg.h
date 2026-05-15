@@ -41,7 +41,11 @@ struct {
     };
 };
   vaddr_t eip;
-  //Surius:     PA2 stage-1 only needs these flag bits.
+  
+  //Surius: PA3 stage-1 needs CS register (ring 0) for exception handling.
+  uint32_t cs;
+  
+  //Surius: PA2 stage-1 only needs these flag bits.
   union {
     rtlreg_t eflags;
     struct {
@@ -56,6 +60,13 @@ struct {
       uint32_t    : 20;
     };
   };
+  
+  //Surius: PA3 stage-1 adds IDTR register for IDT base and limit.
+  struct {
+    uint16_t limit;
+    uint32_t base;
+  } idtr;
+
 } CPU_state;
 
 extern CPU_state cpu;

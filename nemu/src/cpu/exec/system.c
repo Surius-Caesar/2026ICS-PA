@@ -2,9 +2,13 @@
 
 void diff_test_skip_qemu();
 void diff_test_skip_nemu();
+void raise_intr(uint8_t NO, vaddr_t ret_addr);
 
 make_EHelper(lidt) {
-  TODO();
+  //Surius: Load IDT register from memory. The operand contains limit (2 bytes) and base (4 bytes).
+  uint32_t addr = id_dest->addr;
+  cpu.idtr.limit = vaddr_read(addr, 2);
+  cpu.idtr.base = vaddr_read(addr + 2, 4);
 
   print_asm_template1(lidt);
 }
@@ -26,7 +30,10 @@ make_EHelper(mov_cr2r) {
 }
 
 make_EHelper(int) {
-  TODO();
+  //Surius: Trigger software interrupt. Call raise_intr() to handle the exception.
+  raise_intr(id_dest->val, decoding.seq_eip);
+  decoding.jmp_eip = cpu.eip;
+  decoding.is_jmp = 1;
 
   print_asm("int %s", id_dest->str);
 
@@ -36,7 +43,10 @@ make_EHelper(int) {
 }
 
 make_EHelper(iret) {
-  TODO();
+  //Surius: Pop EIP, CS, and EFLAGS from stack and restore them.
+  rtl_pop(&cpu.eip);
+  rtl_pop(&cpu.cs);
+  rtl_pop(&cpu.eflags);
 
   print_asm("iret");
 }

@@ -21,13 +21,31 @@ make_EHelper(pop) {
 }
 
 make_EHelper(pusha) {
-  TODO();
+  //Surius: Push all general purpose registers in order: EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI.
+  //Surius: When pushing ESP, use the value before PUSHA execution.
+  uint32_t esp_at_pusha = cpu.esp;
+  rtl_push(&cpu.eax);
+  rtl_push(&cpu.ecx);
+  rtl_push(&cpu.edx);
+  rtl_push(&cpu.ebx);
+  rtl_push(&esp_at_pusha);
+  rtl_push(&cpu.ebp);
+  rtl_push(&cpu.esi);
+  rtl_push(&cpu.edi);
 
   print_asm("pusha");
 }
 
 make_EHelper(popa) {
-  TODO();
+  //Surius: Pop all general purpose registers in reverse order: EDI, ESI, EBP, (skip ESP), EBX, EDX, ECX, EAX.
+  rtl_pop(&cpu.edi);
+  rtl_pop(&cpu.esi);
+  rtl_pop(&cpu.ebp);
+  rtl_pop(&t0);  //Surius: Skip ESP
+  rtl_pop(&cpu.ebx);
+  rtl_pop(&cpu.edx);
+  rtl_pop(&cpu.ecx);
+  rtl_pop(&cpu.eax);
 
   print_asm("popa");
 }

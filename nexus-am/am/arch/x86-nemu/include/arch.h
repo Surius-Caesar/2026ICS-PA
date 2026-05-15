@@ -7,14 +7,19 @@
 #define PGSIZE    4096    // Bytes mapped by a page
 
 struct _RegSet {
-  uintptr_t esi, ebx, eax, eip, edx, error_code, eflags, ecx, cs, esp, edi, ebp;
-  int       irq;
+  //Surius: Trap frame layout from stack (low address to high address):
+  //Surius: EAX, ECX, EDX, EBX, ESP_old, EBP, ESI, EDI (from pusha)
+  //Surius: irq, error_code (from vecsys/vecnull)
+  //Surius: EIP, CS, EFLAGS (from hardware)
+  uintptr_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
+  int       irq, error_code;
+  uintptr_t eip, cs, eflags;
 };
 
-#define SYSCALL_ARG1(r) 0
-#define SYSCALL_ARG2(r) 0
-#define SYSCALL_ARG3(r) 0
-#define SYSCALL_ARG4(r) 0
+#define SYSCALL_ARG1(r) ((r)->eax)  //Surius: Syscall number in EAX
+#define SYSCALL_ARG2(r) ((r)->ebx)  //Surius: First argument in EBX
+#define SYSCALL_ARG3(r) ((r)->ecx)  //Surius: Second argument in ECX
+#define SYSCALL_ARG4(r) ((r)->edx)  //Surius: Third argument in EDX
 
 #ifdef __cplusplus
 extern "C" {

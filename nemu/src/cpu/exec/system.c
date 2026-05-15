@@ -48,6 +48,10 @@ make_EHelper(iret) {
   rtl_pop(&cpu.cs);
   rtl_pop(&cpu.eflags);
 
+  //Surius: Tell update_eip() to jump to the restored EIP.
+  decoding.jmp_eip = cpu.eip;
+  decoding.is_jmp = 1;
+
   print_asm("iret");
 }
 

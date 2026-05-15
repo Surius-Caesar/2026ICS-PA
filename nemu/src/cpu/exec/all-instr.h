@@ -55,6 +55,11 @@ make_EHelper(nop);
 
 make_EHelper(operand_size);
 
+//Surius: PA3 stage-1 system/interrupt helpers.
+make_EHelper(lidt);
+make_EHelper(int);
+make_EHelper(iret);
+
 //Surius: IOE port I/O helpers declared for HAS_IOE.
 make_EHelper(in);
 make_EHelper(out);

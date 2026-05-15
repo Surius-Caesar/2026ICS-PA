@@ -8,10 +8,11 @@ void raise_intr(uint8_t NO, vaddr_t ret_addr) {
   //Surius: Read gate descriptor from IDT.
   //Surius: IDT is an array of GateDesc, each 8 bytes.
   uint32_t idt_addr = cpu.idtr.base + NO * 8;
-  GateDesc *gate = (GateDesc *)guest_to_host(idt_addr);
+  uint32_t low = vaddr_read(idt_addr, 4);
+  uint32_t high = vaddr_read(idt_addr + 4, 4);
   
   //Surius: Extract the offset from gate descriptor (16-bit offset fields).
-  uint32_t offset = (gate->offset_31_16 << 16) | gate->offset_15_0;
+  uint32_t offset = ((high >> 16) << 16) | (low & 0xffff);
   
   //Surius: Push EFLAGS, CS, and return address (EIP) onto stack.
   //Surius: Stack grows downward, so ESP decreases first.

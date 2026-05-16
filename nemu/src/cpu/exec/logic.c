@@ -125,6 +125,28 @@ make_EHelper(setcc) {
   print_asm("set%s %s", get_cc_name(subcode), id_dest->str);
 }
 
+make_EHelper(bsr) {
+  uint32_t mask = (id_src->width == 4) ? 0xffffffffu : ((1u << (id_src->width * 8)) - 1);
+  uint32_t src = id_src->val & mask;
+
+  if (src == 0) {
+    rtl_set_ZF(&t1);
+  }
+  else {
+    uint32_t idx = 0;
+    for (uint32_t i = 0; i < (uint32_t)(id_src->width * 8); i++) {
+      if (src & (1u << i)) {
+        idx = i;
+      }
+    }
+    t0 = idx;
+    operand_write(id_dest, &t0);
+    rtl_set_ZF(&tzero);
+  }
+
+  print_asm_template2(bsr);
+}
+
 make_EHelper(not) {
   //Not only flips bits, flags not changed.
   rtl_not(&id_dest->val);

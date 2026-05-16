@@ -191,7 +191,7 @@ opcode_entry opcode_table [512] = {
   /* 0xb0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xb4 */	EMPTY, EMPTY, IDEXW(E2G, movzx, 1), IDEXW(E2G, movzx, 2),
   /* 0xb8 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xbc */	EMPTY, EMPTY, IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2), //0x0f 0xbe/0xbf = MOVSX r32,r/m8/16; was wrongly placed at 0xba/0xbb (0xb8 row slots 3-4), fixed to 0xbe/0xbf (0xbc row slots 3-4)
+  /* 0xbc */	EMPTY, IDEX(E2G, bsr), IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2),
   /* 0xc0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc8 */	EMPTY, EMPTY, EMPTY, EMPTY,

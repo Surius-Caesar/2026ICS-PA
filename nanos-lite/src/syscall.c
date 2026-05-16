@@ -13,6 +13,18 @@ static uintptr_t sys_exit(uintptr_t status) {
 }
 
 static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
+  Log("SYS_write(fd=%d, buf=%p, len=%d)", (int)fd, buf, (int)len);
+
+  int preview_len = (len < 16) ? (int)len : 16;
+  char preview[17];
+  const char *raw = (const char *)buf;
+  for (int i = 0; i < preview_len; i++) {
+    char ch = raw[i];
+    preview[i] = (ch >= 32 && ch <= 126) ? ch : '.';
+  }
+  preview[preview_len] = '\0';
+  Log("SYS_write preview=\"%s\"%s", preview, (len > 16) ? "..." : "");
+
   if (fd == 1 || fd == 2) {
     const char *p = (const char *)buf;
     for (size_t i = 0; i < len; i++) {
@@ -23,6 +35,11 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
 
   panic("sys_write: unsupported fd = %d", fd);
   return -1;
+}
+
+static uintptr_t sys_brk(uintptr_t brk) {
+  (void)brk;
+  return 0;
 }
 
 _RegSet* do_syscall(_RegSet *r) {
@@ -44,6 +61,9 @@ _RegSet* do_syscall(_RegSet *r) {
       break;
     case SYS_write:
       ret = sys_write(a[1], (const void *)a[2], a[3]);
+      break;
+    case SYS_brk:
+      ret = sys_brk(a[1]);
       break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }

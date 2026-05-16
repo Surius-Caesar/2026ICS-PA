@@ -41,31 +41,31 @@ static make_EHelper(name) { \
 
 /* 0x80, 0x81, 0x83 */
 make_group(gp1,
-  //Surius:     Group-1 arithmetic/logical ops by ext opcode.
+  //Group-1 arithmetic/logical ops by ext opcode.
   EX(add), EX(or), EX(adc), EX(sbb),
   EX(and), EX(sub), EX(xor), EX(cmp))
 
   /* 0xc0, 0xc1, 0xd0, 0xd1, 0xd2, 0xd3 */
 make_group(gp2,
-  //Surius: /0=rol /1=ror /2=rcl(skip) /3=rcr(skip) /4=shl /5=shr /6=shl /7=sar
+  ///0=rol /1=ror /2=rcl(skip) /3=rcr(skip) /4=shl /5=shr /6=shl /7=sar
   EX(rol), EX(ror), EMPTY, EMPTY,
   EX(shl), EX(shr), EMPTY, EX(sar))
 
   /* 0xf6, 0xf7 */
 make_group(gp3,
-  //Surius: /0=test /1=undef /2=not /3=neg /4=mul /5=imul /6=div /7=idiv
+  ///0=test /1=undef /2=not /3=neg /4=mul /5=imul /6=div /7=idiv
   IDEX(test_I, test), EMPTY, EX(not), EX(neg),
   EX(mul), EX(imul1), EX(div), EX(idiv))
 
   /* 0xfe */
 make_group(gp4,
-  //Surius:     Group-4 has inc/dec on Eb.
+  //Group-4 has inc/dec on Eb.
   EX(inc), EX(dec), EMPTY, EMPTY,
     EMPTY, EMPTY, EMPTY, EMPTY)
 
   /* 0xff */
 make_group(gp5,
-  //Surius:     Group-5 has inc/dec/call/jmp/push forms.
+  //Group-5 has inc/dec/call/jmp/push forms.
   EX(inc), EX(dec), EX(call_rm), EMPTY,
   EX(jmp_rm), EMPTY, EX(push), EMPTY)
 
@@ -80,7 +80,7 @@ opcode_entry opcode_table [512] = {
   /* 0x00 */	IDEXW(G2E, add, 1), IDEX(G2E, add), IDEXW(E2G, add, 1), IDEX(E2G, add),
   /* 0x04 */	IDEXW(I2a, add, 1), IDEX(I2a, add), EMPTY, EMPTY,
   /* 0x08 */	IDEXW(G2E, or, 1), IDEX(G2E, or), IDEXW(E2G, or, 1), IDEX(E2G, or),
-  /* 0x0c */	IDEXW(I2a, or, 1), IDEX(I2a, or), EMPTY, EX(2byte_esc), //Surius: 0x0c/0x0d = or al/eax,imm
+  /* 0x0c */	IDEXW(I2a, or, 1), IDEX(I2a, or), EMPTY, EX(2byte_esc), //0x0c/0x0d = or al/eax,imm
   /* 0x10 */	IDEXW(G2E, adc, 1), IDEX(G2E, adc), IDEXW(E2G, adc, 1), IDEX(E2G, adc),
   /* 0x14 */	IDEXW(I2a, adc, 1), IDEX(I2a, adc), EMPTY, EMPTY,
   /* 0x18 */	IDEXW(G2E, sbb, 1), IDEX(G2E, sbb), IDEXW(E2G, sbb, 1), IDEX(E2G, sbb),
@@ -97,9 +97,9 @@ opcode_entry opcode_table [512] = {
   /* 0x44 */	IDEX(r, inc), IDEX(r, inc), IDEX(r, inc), IDEX(r, inc),
   /* 0x48 */	IDEX(r, dec), IDEX(r, dec), IDEX(r, dec), IDEX(r, dec),
   /* 0x4c */	IDEX(r, dec), IDEX(r, dec), IDEX(r, dec), IDEX(r, dec),
-  /* 0x50 */	IDEX(r, push), IDEX(r, push), IDEX(r, push), IDEX(r, push), //Surius:     0x50-0x57 are push r32.
+  /* 0x50 */	IDEX(r, push), IDEX(r, push), IDEX(r, push), IDEX(r, push), //0x50-0x57 are push r32.
   /* 0x54 */	IDEX(r, push), IDEX(r, push), IDEX(r, push), IDEX(r, push),
-  /* 0x58 */	IDEX(r, pop), IDEX(r, pop), IDEX(r, pop), IDEX(r, pop), //Surius:     0x58-0x5f are pop r32.
+  /* 0x58 */	IDEX(r, pop), IDEX(r, pop), IDEX(r, pop), IDEX(r, pop), //0x58-0x5f are pop r32.
   /* 0x5c */	IDEX(r, pop), IDEX(r, pop), IDEX(r, pop), IDEX(r, pop),
   /* 0x60 */	EX(pusha), EX(popa), EMPTY, EMPTY,
   /* 0x64 */	EMPTY, EMPTY, EX(operand_size), EMPTY,
@@ -125,7 +125,7 @@ opcode_entry opcode_table [512] = {
   /* 0xb4 */	IDEXW(mov_I2r, mov, 1), IDEXW(mov_I2r, mov, 1), IDEXW(mov_I2r, mov, 1), IDEXW(mov_I2r, mov, 1),
   /* 0xb8 */	IDEX(mov_I2r, mov), IDEX(mov_I2r, mov), IDEX(mov_I2r, mov), IDEX(mov_I2r, mov),
   /* 0xbc */	IDEX(mov_I2r, mov), IDEX(mov_I2r, mov), IDEX(mov_I2r, mov), IDEX(mov_I2r, mov),
-  /* 0xc0 */	IDEXW(gp2_Ib2E, gp2, 1), IDEX(gp2_Ib2E, gp2), EMPTY, EX(ret), //Surius:     0xc3 is ret.
+  /* 0xc0 */	IDEXW(gp2_Ib2E, gp2, 1), IDEX(gp2_Ib2E, gp2), EMPTY, EX(ret), //0xc3 is ret.
   /* 0xc4 */	EMPTY, EMPTY, IDEXW(mov_I2E, mov, 1), IDEX(mov_I2E, mov),
   /* 0xc8 */	EMPTY, EX(leave), EMPTY, EMPTY,
   /* 0xcc */	EMPTY, IDEXW(I, int, 1), EMPTY, EX(iret),
@@ -134,9 +134,9 @@ opcode_entry opcode_table [512] = {
   /* 0xd8 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xdc */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xe0 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xe4 */	IDEXW(in_I2a, in, 1), IDEX(in_I2a, in), IDEXW(out_a2I, out, 1), IDEX(out_a2I, out), //Surius: 0xe4/e5=in imm8, 0xe6/e7=out imm8
+  /* 0xe4 */	IDEXW(in_I2a, in, 1), IDEX(in_I2a, in), IDEXW(out_a2I, out, 1), IDEX(out_a2I, out), //0xe4/e5=in imm8, 0xe6/e7=out imm8
   /* 0xe8 */	IDEX(J, call), IDEX(J, jmp), EMPTY, IDEXW(J, jmp, 1),
-  /* 0xec */	IDEXW(in_dx2a, in, 1), IDEX(in_dx2a, in), IDEXW(out_a2dx, out, 1), IDEX(out_a2dx, out), //Surius: 0xec/ed=in dx, 0xee/ef=out dx
+  /* 0xec */	IDEXW(in_dx2a, in, 1), IDEX(in_dx2a, in), IDEXW(out_a2dx, out, 1), IDEX(out_a2dx, out), //0xec/ed=in dx, 0xee/ef=out dx
   /* 0xf0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xf4 */	EMPTY, EMPTY, IDEXW(E, gp3, 1), IDEX(E, gp3),
   /* 0xf8 */	EMPTY, EMPTY, EMPTY, EMPTY,
@@ -187,11 +187,11 @@ opcode_entry opcode_table [512] = {
   /* 0xa0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xac */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul2), //Surius: 0x0f 0xaf = IMUL r32,r/m32; was wrongly placed at 0xab (0xa8 row slot 4), fixed to 0xaf (0xac row slot 4)
+  /* 0xac */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul2), //0x0f 0xaf = IMUL r32,r/m32; was wrongly placed at 0xab (0xa8 row slot 4), fixed to 0xaf (0xac row slot 4)
   /* 0xb0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xb4 */	EMPTY, EMPTY, IDEXW(E2G, movzx, 1), IDEXW(E2G, movzx, 2),
   /* 0xb8 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xbc */	EMPTY, EMPTY, IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2), //Surius: 0x0f 0xbe/0xbf = MOVSX r32,r/m8/16; was wrongly placed at 0xba/0xbb (0xb8 row slots 3-4), fixed to 0xbe/0xbf (0xbc row slots 3-4)
+  /* 0xbc */	EMPTY, EMPTY, IDEXW(E2G, movsx, 1), IDEXW(E2G, movsx, 2), //0x0f 0xbe/0xbf = MOVSX r32,r/m8/16; was wrongly placed at 0xba/0xbb (0xb8 row slots 3-4), fixed to 0xbe/0xbf (0xbc row slots 3-4)
   /* 0xc0 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc4 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xc8 */	EMPTY, EMPTY, EMPTY, EMPTY,

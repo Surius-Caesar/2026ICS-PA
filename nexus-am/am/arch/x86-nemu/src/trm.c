@@ -2,7 +2,7 @@
 #include <x86.h>
 
 // Define this macro after serial has been implemented
-#define HAS_SERIAL //Surius: serial in/out implemented, enable putc via UART
+#define HAS_SERIAL //serial in/out implemented, enable putc via UART
 
 #define SERIAL_PORT 0x3f8
 

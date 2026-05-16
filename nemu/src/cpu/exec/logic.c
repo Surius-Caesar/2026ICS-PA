@@ -1,10 +1,10 @@
 #include "cpu/exec.h"
 
 make_EHelper(test) {
-  //Surius:     Test is and without write back.
+  //Test is and without write back.
   rtl_and(&t2, &id_dest->val, &id_src->val);
 
-  //Surius:     Logic test updates ZF/SF and clears CF/OF.
+  //Logic test updates ZF/SF and clears CF/OF.
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);
@@ -13,11 +13,11 @@ make_EHelper(test) {
 }
 
 make_EHelper(and) {
-  //Surius:     Do and and write result.
+  //Do and and write result.
   rtl_and(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     Logic op updates ZF/SF and clears CF/OF.
+  //Logic op updates ZF/SF and clears CF/OF.
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);
@@ -26,11 +26,11 @@ make_EHelper(and) {
 }
 
 make_EHelper(xor) {
-  //Surius:     Do xor and write result back.
+  //Do xor and write result back.
   rtl_xor(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     xor clears CF/OF, but updates ZF/SF.
+  //xor clears CF/OF, but updates ZF/SF.
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);
@@ -39,11 +39,11 @@ make_EHelper(xor) {
 }
 
 make_EHelper(or) {
-  //Surius:     Do or and write result.
+  //Do or and write result.
   rtl_or(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     Logic op updates ZF/SF and clears CF/OF.
+  //Logic op updates ZF/SF and clears CF/OF.
   rtl_update_ZFSF(&t2, id_dest->width);
   rtl_set_CF(&tzero);
   rtl_set_OF(&tzero);
@@ -52,7 +52,7 @@ make_EHelper(or) {
 }
 
 make_EHelper(rol) {
-  //Surius: Rotate left: shift left by n, OR with shift right by (width-n).
+  //Rotate left: shift left by n, OR with shift right by (width-n).
   uint32_t n = id_src->val & 0x1f;
   uint32_t wb = id_dest->width * 8;
   n = n % wb;
@@ -68,7 +68,7 @@ make_EHelper(rol) {
 }
 
 make_EHelper(ror) {
-  //Surius: Rotate right: shift right by n, OR with shift left by (width-n).
+  //Rotate right: shift right by n, OR with shift left by (width-n).
   uint32_t n = id_src->val & 0x1f;
   uint32_t wb = id_dest->width * 8;
   n = n % wb;
@@ -84,7 +84,7 @@ make_EHelper(ror) {
 }
 
 make_EHelper(sar) {
-  //Surius:     Arithmetic right shift: sign-extend to 32bit first, then sar.
+  //Arithmetic right shift: sign-extend to 32bit first, then sar.
   rtl_sext(&t2, &id_dest->val, id_dest->width);
   rtl_andi(&t0, &id_src->val, 0x1f);
   rtl_sar(&t2, &t2, &t0);
@@ -96,7 +96,7 @@ make_EHelper(sar) {
 }
 
 make_EHelper(shl) {
-  //Surius:     Left shift: mask count to 5 bits, shift, update ZF/SF.
+  //Left shift: mask count to 5 bits, shift, update ZF/SF.
   rtl_andi(&t0, &id_src->val, 0x1f);
   rtl_shl(&t2, &id_dest->val, &t0);
   operand_write(id_dest, &t2);
@@ -107,7 +107,7 @@ make_EHelper(shl) {
 }
 
 make_EHelper(shr) {
-  //Surius:     Logical right shift: mask count to 5 bits, shift, update ZF/SF.
+  //Logical right shift: mask count to 5 bits, shift, update ZF/SF.
   rtl_andi(&t0, &id_src->val, 0x1f);
   rtl_shr(&t2, &id_dest->val, &t0);
   operand_write(id_dest, &t2);
@@ -126,7 +126,7 @@ make_EHelper(setcc) {
 }
 
 make_EHelper(not) {
-  //Surius:     Not only flips bits, flags not changed.
+  //Not only flips bits, flags not changed.
   rtl_not(&id_dest->val);
   operand_write(id_dest, &id_dest->val);
 

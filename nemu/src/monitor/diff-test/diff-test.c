@@ -149,7 +149,7 @@ void difftest_step(uint32_t eip) {
 
   // TODO: Check the registers state with QEMU.
   // Set `diff` as `true` if they are not the same.
-  //Surius:     Compare all 8 GPRs and eip between NEMU and QEMU.
+  //Compare all 8 GPRs and eip between NEMU and QEMU.
 #define CHECK_REG(name) \
   if (r.name != cpu.name) { \
     printf("diff at " #name ": nemu=0x%08x qemu=0x%08x\n", cpu.name, r.name); \

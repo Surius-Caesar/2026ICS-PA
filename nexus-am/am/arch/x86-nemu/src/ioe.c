@@ -9,7 +9,7 @@ void _ioe_init() {
 }
 
 unsigned long _uptime() {
-  //Surius: Read current time from RTC port and subtract boot time to get uptime in ms.
+  //Read current time from RTC port and subtract boot time to get uptime in ms.
   return inl(RTC_PORT) - boot_time;
 }
 
@@ -23,7 +23,7 @@ _Screen _screen = {
 extern void* memcpy(void *, const void *, int);
 
 void _draw_rect(const uint32_t *pixels, int x, int y, int w, int h) {
-  //Surius: Copy pixel rows one by one into framebuffer at the correct (x,y) offset.
+  //Copy pixel rows one by one into framebuffer at the correct (x,y) offset.
   int j;
   for (j = 0; j < h; j++) {
     memcpy(fb + (y + j) * _screen.width + x, pixels + j * w, w * sizeof(uint32_t));
@@ -38,7 +38,7 @@ void _draw_sync() {
 #define I8042_HASKEY_MASK 0x1
 
 int _read_key() {
-  //Surius: Poll status register; if a key event is queued, read and return the AM scancode.
+  //Poll status register; if a key event is queued, read and return the AM scancode.
   if (inb(I8042_STATUS_PORT) & I8042_HASKEY_MASK) {
     return inl(I8042_DATA_PORT);
   }

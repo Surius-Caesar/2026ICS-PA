@@ -82,13 +82,13 @@ static inline void load_img() {
 static inline void restart() {
   /* Set the initial instruction pointer. */
   cpu.eip = ENTRY_START;
-  //Surius:     Use i386 reset value for EFLAGS.
+  //Use i386 reset value for EFLAGS.
   cpu.eflags = 0x00000002;
   
-  //Surius: PA3 stage-1 initializes CS to kernel code segment selector (8).
+  //PA3 stage-1 initializes CS to kernel code segment selector (8).
   cpu.cs = 8;
   
-  //Surius: PA3 stage-1 initializes IDTR to zero.
+  //PA3 stage-1 initializes IDTR to zero.
   cpu.idtr.limit = 0;
   cpu.idtr.base = 0;
 

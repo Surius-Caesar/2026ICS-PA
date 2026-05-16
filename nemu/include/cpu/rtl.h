@@ -111,7 +111,7 @@ static inline void rtl_sr(int r, int width, const rtlreg_t* src1) {
   }
 }
 
-//Surius:     Use one macro to generate tiny helpers for each flag.
+//Use one macro to generate tiny helpers for each flag.
 #define make_rtl_setget_eflags(f) \
   static inline void concat(rtl_set_, f) (const rtlreg_t* src) { \
     cpu.f = *src & 0x1; \
@@ -127,19 +127,19 @@ make_rtl_setget_eflags(SF)
 
 static inline void rtl_mv(rtlreg_t* dest, const rtlreg_t *src1) {
   // dest <- src1
-  //Surius:     Plain value copy.
+  //Plain value copy.
   *dest = *src1;
 }
 
 static inline void rtl_not(rtlreg_t* dest) {
   // dest <- ~dest
-  //Surius:     Flip all bits in place.
+  //Flip all bits in place.
   *dest = ~(*dest);
 }
 
 static inline void rtl_sext(rtlreg_t* dest, const rtlreg_t* src1, int width) {
   // dest <- signext(src1[(width * 8 - 1) .. 0])
-  //Surius:     Sign-extend by width (1/2/4 bytes).
+  //Sign-extend by width (1/2/4 bytes).
   switch (width) {
     case 1: *dest = (int32_t)(int8_t)(*src1); return;
     case 2: *dest = (int32_t)(int16_t)(*src1); return;
@@ -151,7 +151,7 @@ static inline void rtl_sext(rtlreg_t* dest, const rtlreg_t* src1, int width) {
 static inline void rtl_push(const rtlreg_t* src1) {
   // esp <- esp - 4
   // M[esp] <- src1
-  //Surius:     Push one dword onto stack.
+  //Push one dword onto stack.
   rtl_subi(&cpu.esp, &cpu.esp, 4);
   rtl_sm(&cpu.esp, 4, src1);
 }
@@ -159,38 +159,38 @@ static inline void rtl_push(const rtlreg_t* src1) {
 static inline void rtl_pop(rtlreg_t* dest) {
   // dest <- M[esp]
   // esp <- esp + 4
-  //Surius:     Pop one dword from stack.
+  //Pop one dword from stack.
   rtl_lm(dest, &cpu.esp, 4);
   rtl_addi(&cpu.esp, &cpu.esp, 4);
 }
 
 static inline void rtl_eq0(rtlreg_t* dest, const rtlreg_t* src1) {
   // dest <- (src1 == 0 ? 1 : 0)
-  //Surius:     Check if source is zero.
+  //Check if source is zero.
   *dest = (*src1 == 0);
 }
 
 static inline void rtl_eqi(rtlreg_t* dest, const rtlreg_t* src1, int imm) {
   // dest <- (src1 == imm ? 1 : 0)
-  //Surius:     Check if source equals the immediate.
+  //Check if source equals the immediate.
   *dest = (*src1 == (rtlreg_t)imm);
 }
 
 static inline void rtl_neq0(rtlreg_t* dest, const rtlreg_t* src1) {
   // dest <- (src1 != 0 ? 1 : 0)
-  //Surius:     Check if source is non-zero.
+  //Check if source is non-zero.
   *dest = (*src1 != 0);
 }
 
 static inline void rtl_msb(rtlreg_t* dest, const rtlreg_t* src1, int width) {
   // dest <- src1[width * 8 - 1]
-  //Surius:     Take sign bit under current width.
+  //Take sign bit under current width.
   *dest = (*src1 >> (width * 8 - 1)) & 0x1;
 }
 
 static inline void rtl_update_ZF(const rtlreg_t* result, int width) {
   // eflags.ZF <- is_zero(result[width * 8 - 1 .. 0])
-  //Surius:     Mask by width, then update ZF.
+  //Mask by width, then update ZF.
   uint32_t mask = (width == 4 ? 0xffffffffu : ((1u << (width * 8)) - 1));
   rtlreg_t t = ((*result & mask) == 0);
   rtl_set_ZF(&t);
@@ -198,7 +198,7 @@ static inline void rtl_update_ZF(const rtlreg_t* result, int width) {
 
 static inline void rtl_update_SF(const rtlreg_t* result, int width) {
   // eflags.SF <- is_sign(result[width * 8 - 1 .. 0])
-  //Surius:     Read sign bit and update SF.
+  //Read sign bit and update SF.
   rtlreg_t t = (*result >> (width * 8 - 1)) & 0x1;
   rtl_set_SF(&t);
 }

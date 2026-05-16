@@ -25,16 +25,16 @@ make_EHelper(jmp_rm) {
 
 make_EHelper(call) {
   // the target address is calculated at the decode stage
-  //Surius:     Call does two things: push return EIP, then jump.
+  //Call does two things: push return EIP, then jump.
   rtl_push(&decoding.seq_eip);
-  //Surius:     Let update_eip() pick jmp_eip in this round.
+  //Let update_eip() pick jmp_eip in this round.
   decoding.is_jmp = 1;
 
   print_asm("call %x", decoding.jmp_eip);
 }
 
 make_EHelper(ret) {
-  //Surius:     Ret pops target EIP from stack and jumps back.
+  //Ret pops target EIP from stack and jumps back.
   rtl_pop(&decoding.jmp_eip);
   decoding.is_jmp = 1;
 
@@ -42,7 +42,7 @@ make_EHelper(ret) {
 }
 
 make_EHelper(call_rm) {
-  //Surius:     call r/m32 is the same flow: push return EIP, then jump.
+  //call r/m32 is the same flow: push return EIP, then jump.
   rtl_push(&decoding.seq_eip);
   decoding.jmp_eip = id_dest->val;
   decoding.is_jmp = 1;

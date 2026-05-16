@@ -1,18 +1,18 @@
 #include "cpu/exec.h"
 
 make_EHelper(add) {
-  //Surius:     Do dest + src and write back.
+  //Do dest + src and write back.
   rtl_add(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     Update ZF/SF from result.
+  //Update ZF/SF from result.
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  //Surius:     CF means unsigned carry out.
+  //CF means unsigned carry out.
   rtl_sltu(&t0, &t2, &id_dest->val);
   rtl_set_CF(&t0);
 
-  //Surius:     OF means signed overflow.
+  //OF means signed overflow.
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_not(&t0);
   rtl_xor(&t1, &id_dest->val, &t2);
@@ -24,18 +24,18 @@ make_EHelper(add) {
 }
 
 make_EHelper(sub) {
-  //Surius:     First do dest - src, then write result back.
+  //First do dest - src, then write result back.
   rtl_sub(&t2, &id_dest->val, &id_src->val);
   operand_write(id_dest, &t2);
 
-  //Surius:     ZF/SF follow the result bits.
+  //ZF/SF follow the result bits.
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  //Surius:     CF means unsigned borrow sign. 
+  //CF means unsigned borrow sign. 
   rtl_sltu(&t0, &id_dest->val, &t2);
   rtl_set_CF(&t0);
 
-  //Surius:     OF means signed overflow sign.
+  //OF means signed overflow sign.
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);
@@ -46,17 +46,17 @@ make_EHelper(sub) {
 }
 
 make_EHelper(cmp) {
-  //Surius:     Cmp is like sub but no write back.
+  //Cmp is like sub but no write back.
   rtl_sub(&t2, &id_dest->val, &id_src->val);
 
-  //Surius:     Update ZF/SF from compare result.
+  //Update ZF/SF from compare result.
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  //Surius:     CF means unsigned borrow.
+  //CF means unsigned borrow.
   rtl_sltu(&t0, &id_dest->val, &t2);
   rtl_set_CF(&t0);
 
-  //Surius:     OF means signed overflow.
+  //OF means signed overflow.
   rtl_xor(&t0, &id_dest->val, &id_src->val);
   rtl_xor(&t1, &id_dest->val, &t2);
   rtl_and(&t0, &t0, &t1);
@@ -67,7 +67,7 @@ make_EHelper(cmp) {
 }
 
 make_EHelper(inc) {
-  //Surius:     Inc keeps CF, only update OF/ZF/SF.
+  //Inc keeps CF, only update OF/ZF/SF.
   rtl_addi(&t2, &id_dest->val, 1);
   operand_write(id_dest, &t2);
 
@@ -85,7 +85,7 @@ make_EHelper(inc) {
 }
 
 make_EHelper(dec) {
-  //Surius:     Dec keeps CF, only update OF/ZF/SF.
+  //Dec keeps CF, only update OF/ZF/SF.
   rtl_subi(&t2, &id_dest->val, 1);
   operand_write(id_dest, &t2);
 
@@ -102,17 +102,17 @@ make_EHelper(dec) {
 }
 
 make_EHelper(neg) {
-  //Surius:     Neg does 0 - dest.
+  //Neg does 0 - dest.
   rtl_sub(&t2, &tzero, &id_dest->val);
   operand_write(id_dest, &t2);
 
   rtl_update_ZFSF(&t2, id_dest->width);
 
-  //Surius:     CF is set when source is not zero.
+  //CF is set when source is not zero.
   rtl_neq0(&t0, &id_dest->val);
   rtl_set_CF(&t0);
 
-  //Surius:     OF check from subtract form: (0 ^ src) & (0 ^ res).
+  //OF check from subtract form: (0 ^ src) & (0 ^ res).
   rtl_xor(&t0, &tzero, &id_dest->val);
   rtl_xor(&t1, &tzero, &t2);
   rtl_and(&t0, &t0, &t1);

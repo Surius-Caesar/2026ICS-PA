@@ -1,12 +1,12 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-// Surius: benchmark test needs to innotate the next two macros. 
+// benchmark test needs to innotate the next two macros. 
 //#define DEBUG
 //#define DIFF_TEST
 
 /* You will define this macro in PA2 */
-#define HAS_IOE //Surius: enable device initialization (serial/timer/keyboard/VGA)
+#define HAS_IOE //enable device initialization (serial/timer/keyboard/VGA)
 
 #include "debug.h"
 #include "macro.h"

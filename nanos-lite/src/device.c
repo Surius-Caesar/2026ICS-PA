@@ -24,12 +24,16 @@ size_t events_read(void *buf, size_t len) {
       bool keydown = (key & 0x8000) ? true : false;
       int keycode = key & 0x7fff;
       const char *action = keydown ? "kd" : "ku";
+      // Ensure keycode is within bounds
+      if (keycode < 0 || keycode >= 256) {
+        keycode = 0; // Default to NONE if out of bounds
+      }
       const char *keyname_str = keyname[keycode];
       event_buf_len = sprintf(event_buffer, "%s %s\n", action, keyname_str);
     } else {
-      // No key event, return timer event
-      unsigned long time_ms = _uptime();
-      event_buf_len = sprintf(event_buffer, "t %d\n", (int)time_ms);
+      // No key event, return timer event with short timestamp
+      unsigned long time_ms = _uptime() % 10000; // Keep timestamp short
+      event_buf_len = sprintf(event_buffer, "t %lu\n", time_ms);
     }
     
     event_buf_pos = 0; // Reset position

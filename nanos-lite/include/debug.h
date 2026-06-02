@@ -4,7 +4,7 @@
 #include "common.h"
 
 // Uncomment the following line to disable all Log output for better performance
-// #define NDEBUG
+#define NDEBUG
 
 #ifdef NDEBUG
   #define Log(format, ...) 

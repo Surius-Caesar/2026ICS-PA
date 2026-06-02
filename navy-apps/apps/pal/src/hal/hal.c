@@ -94,12 +94,6 @@ static intptr_t VMEM_ADDR = (intptr_t)&vmem[0];
 static uint32_t palette[256];
 
 static void redraw() {
-  static int redraw_count = 0;
-  redraw_count++;
-  if (redraw_count <= 5 || redraw_count % 100 == 0) {
-    fprintf(stderr, "[PAL] redraw called (count=%d)\n", redraw_count);
-  }
-  
   for (int i = 0; i < W; i ++)
     for (int j = 0; j < H; j ++)
       fb[i + j * W] = palette[vmem[i + j * W]];
@@ -163,10 +157,6 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, 
     int firstcolor, int ncolors) {
-  static int palette_set_count = 0;
-  palette_set_count++;
-  fprintf(stderr, "[PAL] SDL_SetPalette called (count=%d), ncolors=%d\n", palette_set_count, ncolors);
-  
   assert(s);
   assert(s->format);
   assert(s->format->palette);
@@ -191,15 +181,12 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
 
   if(s->flags & SDL_HWSURFACE) {
     assert(ncolors == 256);
-    fprintf(stderr, "[PAL] Setting hardware palette with %d colors\n", ncolors);
     for (int i = 0; i < ncolors; i ++) {
       uint8_t r = colors[i].r;
       uint8_t g = colors[i].g;
       uint8_t b = colors[i].b;
       palette[i] = (r << 16) | (g << 8) | b;
     }
-    fprintf(stderr, "[PAL] First 3 palette entries: [%06x] [%06x] [%06x]\n", 
-            palette[0], palette[1], palette[2]);
     redraw();
   }
 }

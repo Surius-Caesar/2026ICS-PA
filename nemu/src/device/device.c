@@ -23,6 +23,11 @@ extern void timer_intr();
 extern void send_key(uint8_t, bool);
 extern void update_screen();
 
+// Function to mark screen for update (called from VGA callback)
+void mark_screen_update() {
+  update_screen_flag = 1;
+}
+
 
 static void timer_sig_handler(int signum) {
   jiffy ++;

@@ -11,4 +11,7 @@ int is_mmio(paddr_t);
 uint32_t mmio_read(paddr_t, int, int);
 void mmio_write(paddr_t, int, uint32_t, int);
 
+// Function to mark screen for update (declared in device.c)
+void mark_screen_update();
+
 #endif

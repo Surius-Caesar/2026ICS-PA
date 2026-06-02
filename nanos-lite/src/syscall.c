@@ -2,15 +2,13 @@
 #include "syscall.h"
 #include "fs.h"
 
-//Handler for SYS_none syscall - does nothing and returns 1.
 static uintptr_t sys_none(void) {
   return 1;
 }
 
-//Handler for SYS_exit syscall - halts with exit status.
 static uintptr_t sys_exit(uintptr_t status) {
   _halt(status);
-  return 0;  //Never reached
+  return 0;
 }
 
 static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
@@ -23,7 +21,6 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
   }
   int w = fs_write((int)fd, buf, len);
   if (w >= 0) return (uintptr_t)w;
-
   panic("sys_write: unsupported fd = %d", fd);
   return -1;
 }
@@ -73,33 +70,15 @@ _RegSet* do_syscall(_RegSet *r) {
 
   uintptr_t ret = 0;
   switch (a[0]) {
-    case SYS_none:
-      ret = sys_none();
-      break;
-    case SYS_exit:
-      ret = sys_exit(a[1]);
-      break;
-    case SYS_write:
-      ret = sys_write(a[1], (const void *)a[2], a[3]);
-      break;
-    case SYS_open:
-      ret = sys_open(a[1], a[2], a[3]);
-      break;
-    case SYS_read:
-      ret = sys_read(a[1], (const void *)a[2], a[3]);
-      break;
-    case SYS_close:
-      ret = sys_close(a[1]);
-      break;
-    case SYS_lseek:
-      ret = sys_lseek(a[1], a[2], a[3]);
-      break;
-    case SYS_brk:
-      ret = sys_brk(a[1]);
-      break;
-    case SYS_gettimeofday:
-      ret = sys_gettimeofday(a[1], a[2]);
-      break;
+    case SYS_none: ret = sys_none(); break;
+    case SYS_exit: ret = sys_exit(a[1]); break;
+    case SYS_write: ret = sys_write(a[1], (const void *)a[2], a[3]); break;
+    case SYS_open: ret = sys_open(a[1], a[2], a[3]); break;
+    case SYS_read: ret = sys_read(a[1], (const void *)a[2], a[3]); break;
+    case SYS_close: ret = sys_close(a[1]); break;
+    case SYS_lseek: ret = sys_lseek(a[1], a[2], a[3]); break;
+    case SYS_brk: ret = sys_brk(a[1]); break;
+    case SYS_gettimeofday: ret = sys_gettimeofday(a[1], a[2]); break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 

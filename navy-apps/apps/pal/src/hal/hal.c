@@ -1,6 +1,7 @@
 #include "hal.h"
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <ndl.h>
 
 #define NR_KEYS 18
@@ -33,43 +34,11 @@ PAL_PollEvent(
 
 --*/
 {
-  NDL_Event evt;
-  NDL_WaitEvent(&evt);
-  
-  if (evt.type == NDL_EVENT_TIMER) {
-    systime = evt.data;
+  (void)event;
+  struct timeval tv;
+  if (_gettimeofday(&tv, NULL) == 0) {
+    systime = (uint32_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
   }
-
-  if (evt.type == NDL_EVENT_KEYUP || evt.type == NDL_EVENT_KEYDOWN) {
-    int key = -1, kd = evt.type == NDL_EVENT_KEYDOWN;
-    switch (evt.data) {
-      case NDL_SCANCODE_UP: key = K_UP; break;
-      case NDL_SCANCODE_DOWN: key = K_DOWN; break;
-      case NDL_SCANCODE_LEFT: key = K_LEFT; break;
-      case NDL_SCANCODE_RIGHT: key = K_RIGHT; break;
-      case NDL_SCANCODE_RETURN: key = K_RETURN; break;
-      case NDL_SCANCODE_SPACE: key = K_SPACE; break;
-      case NDL_SCANCODE_ESCAPE: key = K_ESCAPE; break;
-      case NDL_SCANCODE_PAGEUP: key = K_PAGEUP; break;
-      case NDL_SCANCODE_PAGEDOWN: key = K_PAGEDOWN; break;
-      case NDL_SCANCODE_R: key = K_r; break;
-      case NDL_SCANCODE_A: key = K_a; break;
-      case NDL_SCANCODE_D: key = K_d; break;
-      case NDL_SCANCODE_E: key = K_e; break;
-      case NDL_SCANCODE_W: key = K_w; break;
-      case NDL_SCANCODE_Q: key = K_q; break;
-      case NDL_SCANCODE_S: key = K_s; break;
-      case NDL_SCANCODE_F: key = K_f; break;
-      case NDL_SCANCODE_P: key = K_p; break;
-    }
-    if (key != -1 && key_state[key] != kd) {
-      key_state[key] = kd;
-      if (kd) PAL_KeyPressHandler(key);
-      else PAL_KeyReleaseHandler(key);
-    }
-    return true;
-  }
-
   return false;
 }
 
@@ -79,6 +48,10 @@ void SDL_WaitUntil(uint32_t tick) {
 }
 
 uint32_t SDL_GetTicks() {
+  struct timeval tv;
+  if (_gettimeofday(&tv, NULL) == 0) {
+    return (uint32_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+  }
   return systime;
 }
 

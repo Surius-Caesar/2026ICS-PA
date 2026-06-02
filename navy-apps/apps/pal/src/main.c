@@ -148,6 +148,7 @@ PAL_Init(
    PAL_InitResources();
    Log("PAL_InitResources success");
    SOUND_OpenAudio();
+   Log("SOUND_OpenAudio success");
 
 #ifdef PAL_WIN95
 #ifdef _DEBUG

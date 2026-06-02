@@ -185,7 +185,7 @@ opcode_entry opcode_table [512] = {
   /* 0x98 */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
   /* 0x9c */	IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1), IDEXW(E, setcc, 1),
   /* 0xa0 */	EMPTY, EMPTY, EMPTY, EMPTY,
-  /* 0xa4 */	EMPTY, EMPTY, EMPTY, EMPTY,
+  /* 0xa4 */	EX(movsb), EMPTY, EMPTY, EMPTY,
   /* 0xa8 */	EMPTY, EMPTY, EMPTY, EMPTY,
   /* 0xac */	EMPTY, EMPTY, EMPTY, IDEX(E2G, imul2), //0x0f 0xaf = IMUL r32,r/m32; was wrongly placed at 0xab (0xa8 row slot 4), fixed to 0xaf (0xac row slot 4)
   /* 0xb0 */	EMPTY, EMPTY, EMPTY, EMPTY,

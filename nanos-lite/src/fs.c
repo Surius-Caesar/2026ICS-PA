@@ -23,8 +23,8 @@ static Finfo file_table[] __attribute__((used)) = {
 #define NR_FILES (sizeof(file_table) / sizeof(file_table[0]))
 
 void init_fs() {
-  // initialize file system state if needed
-  // currently /dev/fb size may be set by platform; leave as is
+  // Initialize /dev/fb size based on screen dimensions
+  file_table[FD_FB].size = _screen.width * _screen.height * 4; // 4 bytes per pixel (RGBA)
 }
 
 // Simple open/read/close/lseek implementation backed by file_table and ramdisk
@@ -53,6 +53,24 @@ int fs_read(int fd, void *buf, size_t len) {
     return 0; // Ignore operations on stdin/stdout/stderr
   }
   
+  // Handle /dev/events
+  if (fd == FD_EVENTS) {
+    return events_read(buf, len);
+  }
+  
+  // Handle /proc/dispinfo
+  if (fd == FD_DISPINFO) {
+    Finfo *f = &file_table[fd];
+    size_t remain = (f->size > f->open_offset) ? (f->size - f->open_offset) : 0;
+    size_t r = (len < remain) ? len : remain;
+    if (r > 0) {
+      dispinfo_read(buf, f->open_offset, r);
+      f->open_offset += r;
+    }
+    return (int)r;
+  }
+  
+  // Regular file: read from ramdisk
   Finfo *f = &file_table[fd];
   size_t remain = (f->size > f->open_offset) ? (f->size - f->open_offset) : 0;
   size_t r = (len < remain) ? len : remain;
@@ -110,6 +128,15 @@ int fs_write(int fd, const void *buf, size_t len) {
     return 0;
   }
   
+  // Handle /dev/fb: write to frame buffer
+  if (fd == FD_FB) {
+    Finfo *f = &file_table[fd];
+    fb_write(buf, f->open_offset, len);
+    f->open_offset += len;
+    return (int)len;
+  }
+  
+  // Regular file: write to ramdisk
   Finfo *f = &file_table[fd];
   size_t remain = (f->size > f->open_offset) ? (f->size - f->open_offset) : 0;
   size_t w = (len < remain) ? len : remain;

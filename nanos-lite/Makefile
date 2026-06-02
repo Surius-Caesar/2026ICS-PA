@@ -32,4 +32,4 @@ src/syscall.h: $(NAVY_HOME)/libs/libos/src/syscall.h
 	cp -f $^ $@
 
 update: update-ramdisk-fsimg src/syscall.h
-	@touch src/initrd.S
+	@touch src/initrd.S src/fs.c src/files.h

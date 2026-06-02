@@ -139,3 +139,8 @@ size_t fs_filesz(int fd) {
   if (fd < 0 || fd >= NR_FILES) return 0;
   return file_table[fd].size;
 }
+
+off_t fs_disk_offset(int fd) {
+  if (fd < 0 || fd >= NR_FILES) return 0;
+  return file_table[fd].disk_offset;
+}

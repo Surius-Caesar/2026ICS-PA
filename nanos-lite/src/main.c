@@ -31,7 +31,7 @@ int main() {
   init_fs();
 
   // Load user program by filename from filesystem
-  const char *program = "/bin/hello";
+  const char *program = "/bin/bmptest";  // Use first file in ramdisk for testing
   Log("Loading program: %s", program);
   uint32_t entry = loader(NULL, program);
   ((void (*)(void))entry)();

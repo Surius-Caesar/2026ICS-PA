@@ -19,7 +19,7 @@ update-fsimg:
 	$(MAKE) -s -C $(NAVY_HOME) ISA=$(ISA)
 
 update-ramdisk-fsimg: update-fsimg
-	$(eval FSIMG_FILES := $(shell find $(FSIMG_PATH) -type f))
+	$(eval FSIMG_FILES := $(shell find $(FSIMG_PATH) -type f | sort))
 	@for f in $(FSIMG_FILES); do \
 		if $(READELF) -h $$f 2> /dev/null > /dev/null; then \
 			$(OBJCOPY) $(OBJCOPY_FLAG) $$f; \

@@ -14,34 +14,12 @@ static int event_buf_len = 0;
 static int event_buf_pos = 0;
 
 size_t events_read(void *buf, size_t len) {
-  // DEBUG: Return a simple fixed event first to test
-  static int call_count = 0;
-  static const char *test_event = "t 100\n";
-  static int test_pos = 0;
-  
-  if (call_count < 10) {
-    // First 10 calls: return simple timer event one char at a time
-    if (len > 0 && test_pos < 6) {
-      *(char *)buf = test_event[test_pos];
-      test_pos++;
-      if (test_pos >= 6) {
-        // Finished one event, reset for next call
-        test_pos = 0;
-        call_count++;
-      }
-      return 1;
-    }
-    // Should not reach here
-    return 0;
-  }
-  
-  // After 10 calls, use normal logic
-  // If buffer is empty or fully consumed, generate new event
+  // If buffer is empty or fully consumed, try to generate new event
   if (event_buf_pos >= event_buf_len) {
     // Get keyboard event
     int key = _read_key();
     
-    // Check if there's a key event (priority over timer)
+    // Only generate event if there's a key press/release
     if (key != _KEY_NONE) {
       bool keydown = (key & 0x8000) ? true : false;
       int keycode = key & 0x7fff;
@@ -52,13 +30,11 @@ size_t events_read(void *buf, size_t len) {
       }
       const char *keyname_str = keyname[keycode];
       event_buf_len = sprintf(event_buffer, "%s %s\n", action, keyname_str);
+      event_buf_pos = 0;
     } else {
-      // No key event, return timer event with short timestamp
-      unsigned long time_ms = _uptime() % 10000; // Keep timestamp short
-      event_buf_len = sprintf(event_buffer, "t %lu\n", time_ms);
+      // No key event, return 0 to indicate no data available
+      return 0;
     }
-    
-    event_buf_pos = 0; // Reset position
   }
   
   // Copy as much data as possible from internal buffer to output buffer

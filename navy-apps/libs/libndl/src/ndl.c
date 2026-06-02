@@ -88,6 +88,10 @@ int NDL_Render() {
       fwrite(&canvas[i * canvas_w], sizeof(uint32_t), canvas_w, fbdev);
     }
     fflush(fbdev);
+    
+    // Force screen update by calling _draw_sync
+    extern void _draw_sync();
+    _draw_sync();
   }
 }
 

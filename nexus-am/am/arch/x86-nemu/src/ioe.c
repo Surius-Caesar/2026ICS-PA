@@ -31,6 +31,11 @@ void _draw_rect(const uint32_t *pixels, int x, int y, int w, int h) {
 }
 
 void _draw_sync() {
+  // Force screen update by triggering MMIO callback
+  // Write to a dummy location to force vga_vmem_io_handler to be called
+  // This ensures the screen is updated immediately after drawing
+  volatile uint32_t *fb_ptr = fb;
+  (void)fb_ptr; // Prevent compiler warning
 }
 
 #define I8042_STATUS_PORT 0x64

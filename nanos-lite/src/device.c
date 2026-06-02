@@ -8,29 +8,38 @@ static const char *keyname[256] __attribute__((used)) = {
   _KEYS(NAME)
 };
 
+// Internal buffer for events device
+static char event_buffer[64];
+static int event_buf_len = 0;
+static int event_buf_pos = 0;
+
 size_t events_read(void *buf, size_t len) {
-  // Get keyboard event
-  int key = _read_key();
-  
-  char event_buf[64];
-  int event_len = 0;
-  
-  // Check if there's a key event (priority over timer)
-  if (key != _KEY_NONE) {
-    bool keydown = (key & 0x8000) ? true : false;
-    int keycode = key & 0x7fff;
-    const char *action = keydown ? "kd" : "ku";
-    const char *keyname_str = keyname[keycode];
-    event_len = sprintf(event_buf, "%s %s\n", action, keyname_str);
-  } else {
-    // No key event, return timer event
-    unsigned long time_ms = _uptime();
-    event_len = sprintf(event_buf, "t %d\n", (int)time_ms);
+  // If buffer is empty or fully consumed, generate new event
+  if (event_buf_pos >= event_buf_len) {
+    // Get keyboard event
+    int key = _read_key();
+    
+    // Check if there's a key event (priority over timer)
+    if (key != _KEY_NONE) {
+      bool keydown = (key & 0x8000) ? true : false;
+      int keycode = key & 0x7fff;
+      const char *action = keydown ? "kd" : "ku";
+      const char *keyname_str = keyname[keycode];
+      event_buf_len = sprintf(event_buffer, "%s %s\n", action, keyname_str);
+    } else {
+      // No key event, return timer event
+      unsigned long time_ms = _uptime();
+      event_buf_len = sprintf(event_buffer, "t %d\n", (int)time_ms);
+    }
+    
+    event_buf_pos = 0; // Reset position
   }
   
-  // Copy event to output buffer (up to len bytes)
-  int copy_len = (event_len < (int)len) ? event_len : (int)len;
-  memcpy(buf, event_buf, copy_len);
+  // Copy data from internal buffer to output buffer
+  int remain = event_buf_len - event_buf_pos;
+  int copy_len = (remain < (int)len) ? remain : (int)len;
+  memcpy(buf, event_buffer + event_buf_pos, copy_len);
+  event_buf_pos += copy_len;
   
   return copy_len;
 }

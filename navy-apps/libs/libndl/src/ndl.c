@@ -75,9 +75,9 @@ int NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
 
 int NDL_Render() {
   static int render_count = 0;
-  if (render_count < 5) {
+  render_count++;
+  if (render_count <= 10 || render_count % 100 == 0) {
     fprintf(stderr, "[NDL] Render called (count=%d)\n", render_count);
-    render_count++;
   }
   
   if (has_nwm) {

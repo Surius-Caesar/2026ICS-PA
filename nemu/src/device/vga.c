@@ -19,11 +19,6 @@ static uint32_t (*vmem) [SCREEN_W];
 void vga_vmem_io_handler(paddr_t addr, int len, bool is_write) {
   // Mark screen for update on every write to VRAM
   if (is_write) {
-    static int call_count = 0;
-    if (call_count < 10) {
-      printf("[VGA] Write at addr=0x%x, len=%d\n", addr, len);
-      call_count++;
-    }
     mark_screen_update();
   }
 }

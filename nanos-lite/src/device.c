@@ -54,6 +54,12 @@ void dispinfo_read(void *buf, off_t offset, size_t len) {
 }
 
 void fb_write(const void *buf, off_t offset, size_t len) {
+  static int call_count = 0;
+  if (call_count < 5) {
+    Log("fb_write called: offset=%d, len=%d", offset, len);
+    call_count++;
+  }
+  
   // Get screen dimensions from global _screen variable
   int width = _screen.width;
   

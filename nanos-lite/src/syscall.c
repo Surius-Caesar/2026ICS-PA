@@ -14,20 +14,6 @@ static uintptr_t sys_exit(uintptr_t status) {
 }
 
 static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
-  // Log the write syscall with fd, buf, and len for debugging purposes.
-  // the Log function.
-  // Log("SYS_write(fd=%d, buf=%p, len=%d)", (int)fd, buf, (int)len);
-
-  // int preview_len = (len < 16) ? (int)len : 16;
-  // char preview[17];
-  // const char *raw = (const char *)buf;
-  // for (int i = 0; i < preview_len; i++) {
-  //   char ch = raw[i];
-  //   preview[i] = (ch >= 32 && ch <= 126) ? ch : '.';
-  // }
-  // preview[preview_len] = '\0';
-  // Log("SYS_write preview=\"%s\"%s", preview, (len > 16) ? "..." : "");
-
   if (fd == 1 || fd == 2) {
     const char *p = (const char *)buf;
     for (size_t i = 0; i < len; i++) {
@@ -35,7 +21,6 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
     }
     return len;
   }
-  // For other fds, try file system write
   int w = fs_write((int)fd, buf, len);
   if (w >= 0) return (uintptr_t)w;
 
@@ -66,7 +51,6 @@ static uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {
 }
 
 static uintptr_t sys_read(uintptr_t fd, const void *buf, size_t len) {
-  // buf is pointer to user buffer; here we assume direct access
   long r = (long)fs_read((int)fd, (void *)buf, len);
   return (uintptr_t)r;
 }
@@ -89,11 +73,9 @@ _RegSet* do_syscall(_RegSet *r) {
 
   uintptr_t ret = 0;
   switch (a[0]) {
-    //SYS_none: no-op system call
     case SYS_none:
       ret = sys_none();
       break;
-    //SYS_exit: halt with status
     case SYS_exit:
       ret = sys_exit(a[1]);
       break;
@@ -115,11 +97,12 @@ _RegSet* do_syscall(_RegSet *r) {
     case SYS_brk:
       ret = sys_brk(a[1]);
       break;
+    case SYS_gettimeofday:
+      ret = sys_gettimeofday(a[1], a[2]);
+      break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 
-  //Set return value in EAX (SYSCALL_ARG1)
   SYSCALL_ARG1(r) = ret;
-
   return NULL;
 }

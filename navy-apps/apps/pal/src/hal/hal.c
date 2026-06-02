@@ -1,7 +1,6 @@
 #include "hal.h"
 #include <string.h>
 #include <stdlib.h>
-#include <sys/time.h>
 #include <ndl.h>
 
 #define NR_KEYS 18
@@ -75,10 +74,8 @@ PAL_PollEvent(
 }
 
 void SDL_WaitUntil(uint32_t tick) {
-  while (systime < tick) {
-    while (PAL_PollEvent(NULL));
+  while (SDL_GetTicks() < tick) {
   }
-  if (systime > tick) return;
 }
 
 uint32_t SDL_GetTicks() {

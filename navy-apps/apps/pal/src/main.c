@@ -552,8 +552,10 @@ main_loop() {
    //
    // Show the trademark screen and splash screen
    //
-   // Skip trademark RNG (1000+ frames) on NEMU; splash is enough for PA3 demo.
+   // TODO: should we display these?
+   Log("PAL_SplashScreen start");
    PAL_SplashScreen();
+   Log("PAL_SplashScreen done");
 
    //
    // Run the main game routine

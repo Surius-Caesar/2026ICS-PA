@@ -130,6 +130,11 @@ int fs_write(int fd, const void *buf, size_t len) {
   
   // Handle /dev/fb: write to frame buffer
   if (fd == FD_FB) {
+    static int fb_write_count = 0;
+    if (fb_write_count < 5) {
+      Log("fs_write to /dev/fb: len=%d, offset=%d", len, file_table[fd].open_offset);
+      fb_write_count++;
+    }
     Finfo *f = &file_table[fd];
     fb_write(buf, f->open_offset, len);
     f->open_offset += len;

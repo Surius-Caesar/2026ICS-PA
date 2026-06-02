@@ -9,6 +9,7 @@ make_EHelper(popa);
 make_EHelper(movsx);
 make_EHelper(movzx);
 make_EHelper(lea);
+make_EHelper(movsb);
 
 //Control transfer helpers.
 make_EHelper(jmp);

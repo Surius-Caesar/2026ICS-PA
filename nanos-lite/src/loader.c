@@ -23,7 +23,7 @@ uintptr_t loader(_Protect *as, const char *filename) {
   fs_close(fd);
 
   uint8_t *entry = (uint8_t *)DEFAULT_ENTRY;
-  Log("loader: %s loaded (%d bytes), entry = %02x %02x %02x %02x %02x %02x %02x %02x",
+  printk("loader: %s loaded (%d bytes), entry = %02x %02x %02x %02x %02x %02x %02x %02x\n",
       filename, n,
       entry[0], entry[1], entry[2], entry[3],
       entry[4], entry[5], entry[6], entry[7]);

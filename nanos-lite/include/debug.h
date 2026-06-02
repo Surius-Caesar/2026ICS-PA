@@ -16,7 +16,7 @@
 
 #define panic(format, ...) \
   do { \
-    Log("\33[1;31msystem panic: " format, ## __VA_ARGS__); \
+    printk("\33[1;31msystem panic: " format "\n\33[0m", ## __VA_ARGS__); \
     _halt(1); \
   } while (0)
 

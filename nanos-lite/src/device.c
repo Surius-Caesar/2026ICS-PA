@@ -14,11 +14,10 @@ size_t events_read(void *buf, size_t len) {
   if (key != _KEY_NONE) {
     bool keydown = (key & 0x8000) != 0;
     int keycode = key & 0x7fff;
-    if (keycode < 0 || keycode >= 256) {
-      keycode = 0;
+    if (keycode > 0 && keycode < 256) {
+      const char *action = keydown ? "kd" : "ku";
+      return snprintf(buf, len, "%s %s\n", action, keyname[keycode]);
     }
-    const char *action = keydown ? "kd" : "ku";
-    return snprintf(buf, len, "%s %s\n", action, keyname[keycode]);
   }
 
   return snprintf(buf, len, "t %u\n", (unsigned)_uptime());

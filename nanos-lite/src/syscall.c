@@ -40,9 +40,6 @@ static uintptr_t sys_brk(uintptr_t brk) {
 static uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {
   const char *p = (const char *)pathname;
   int fd = fs_open(p, (int)flags, (int)mode);
-  if (fd < 0) {
-    panic("File not found: %s", p);
-  }
   return (uintptr_t)fd;
 }
 

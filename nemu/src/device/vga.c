@@ -7,8 +7,8 @@
 
 #define VMEM 0x40000
 
-#define SCREEN_H 300
-#define SCREEN_W 400
+#define SCREEN_H 200
+#define SCREEN_W 320
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;

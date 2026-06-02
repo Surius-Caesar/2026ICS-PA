@@ -94,6 +94,12 @@ static intptr_t VMEM_ADDR = (intptr_t)&vmem[0];
 static uint32_t palette[256];
 
 static void redraw() {
+  static int redraw_count = 0;
+  redraw_count++;
+  if (redraw_count <= 5 || redraw_count % 100 == 0) {
+    fprintf(stderr, "[PAL] redraw called (count=%d)\n", redraw_count);
+  }
+  
   for (int i = 0; i < W; i ++)
     for (int j = 0; j < H; j ++)
       fb[i + j * W] = palette[vmem[i + j * W]];

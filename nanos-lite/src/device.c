@@ -65,6 +65,7 @@ size_t fb_write(const void *buf, off_t offset, size_t len) {
     x = 0;
     y++;
   }
+  _draw_sync();
   return len;
 }
 

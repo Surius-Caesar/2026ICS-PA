@@ -30,7 +30,10 @@ int main() {
 
   init_fs();
 
-  uint32_t entry = loader(NULL, NULL);
+  // Load user program by filename from filesystem
+  const char *program = "/bin/hello";
+  Log("Loading program: %s", program);
+  uint32_t entry = loader(NULL, program);
   ((void (*)(void))entry)();
 
   panic("Should not reach here");

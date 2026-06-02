@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static int has_nwm = 0;
 static uint32_t *canvas;
@@ -42,6 +43,8 @@ int NDL_OpenDisplay(int w, int h) {
     pad_y = (screen_h - canvas_h) / 2;
     fbdev = fopen("/dev/fb", "w"); assert(fbdev);
     evtdev = fopen("/dev/events", "r"); assert(evtdev);
+    setvbuf(fbdev, NULL, _IONBF, 0);
+    setvbuf(evtdev, NULL, _IONBF, 0);
   }
 }
 
@@ -94,15 +97,20 @@ static const char *keys[] = {
 
 int NDL_WaitEvent(NDL_Event *event) {
   char buf[256];
+  int fd = fileno(evtdev);
 
   while (1) {
     int n = 0;
 
     while (n + 1 < (int)sizeof(buf)) {
-      int ch = getc(evtdev);
-      if (ch == -1) break;
-      buf[n++] = ch;
-      if (ch == '\n') break;
+      int r = read(fd, buf + n, 1);
+      if (r <= 0) {
+        continue;
+      }
+      n += r;
+      if (buf[n - 1] == '\n') {
+        break;
+      }
     }
 
     if (n == 0 || buf[n - 1] != '\n') {

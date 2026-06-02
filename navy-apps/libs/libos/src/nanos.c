@@ -124,11 +124,9 @@ clock_t _times(void *buf) {
   return 0;
 }
 
-int _gettimeofday(struct timeval *tv) {
-  assert(0);
-  tv->tv_sec = 0;
-  tv->tv_usec = 0;
-  return 0;
+int _gettimeofday(struct timeval *tv, void *tz) {
+  (void)tz;
+  return _syscall_(SYS_gettimeofday, (uintptr_t)tv, 0, 0);
 }
 
 int _fcntl(int fd, int cmd, ... ) {

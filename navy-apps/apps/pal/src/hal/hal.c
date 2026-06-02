@@ -1,6 +1,7 @@
 #include "hal.h"
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <ndl.h>
 
 #define NR_KEYS 18

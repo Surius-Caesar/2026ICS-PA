@@ -48,6 +48,17 @@ static uintptr_t sys_brk(uintptr_t brk) {
   return 0;
 }
 
+static uintptr_t sys_gettimeofday(uintptr_t tv, uintptr_t tz) {
+  (void)tz;
+  struct timeval *t = (struct timeval *)tv;
+  if (t != NULL) {
+    unsigned long ms = _uptime();
+    t->tv_sec = ms / 1000;
+    t->tv_usec = (ms % 1000) * 1000;
+  }
+  return 0;
+}
+
 static uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {
   const char *p = (const char *)pathname;
   int fd = fs_open(p, (int)flags, (int)mode);

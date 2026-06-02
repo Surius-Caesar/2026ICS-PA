@@ -113,10 +113,11 @@ int NDL_WaitEvent(NDL_Event *event) {
       return 0;
     }
     if (buf[0] == 't') {
-      int tsc;
-      sscanf(buf + 2, "%d", &tsc);
+      unsigned long tsc;
+      sscanf(buf + 2, "%lu", &tsc);
       event->type = NDL_EVENT_TIMER;
-      event->data = tsc;
+      event->data = (int32_t)tsc;
+      p = buf;
       return 0;
     }
   }

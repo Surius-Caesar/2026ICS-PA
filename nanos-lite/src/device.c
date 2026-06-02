@@ -66,8 +66,31 @@ void fb_write(const void *buf, off_t offset, size_t len) {
   // Calculate how many pixels to write
   int num_pixels = len / 4;
   
-  // Draw rectangle on screen using IOE API
-  _draw_rect((uint32_t *)buf, x, y, num_pixels, 1);
+  // Handle multi-line drawing
+  // If the drawing spans multiple lines, we need to draw row by row
+  int pixels_in_first_row = width - x; // Pixels that fit in the first row
+  
+  if (num_pixels <= pixels_in_first_row) {
+    // Single row drawing
+    _draw_rect((uint32_t *)buf, x, y, num_pixels, 1);
+  } else {
+    // Multi-row drawing: draw first partial row
+    _draw_rect((uint32_t *)buf, x, y, pixels_in_first_row, 1);
+    
+    // Draw full rows
+    int remaining_pixels = num_pixels - pixels_in_first_row;
+    int full_rows = remaining_pixels / width;
+    int pixels_in_last_row = remaining_pixels % width;
+    
+    if (full_rows > 0) {
+      _draw_rect((uint32_t *)buf + pixels_in_first_row, 0, y + 1, width, full_rows);
+    }
+    
+    // Draw last partial row
+    if (pixels_in_last_row > 0) {
+      _draw_rect((uint32_t *)buf + num_pixels - pixels_in_last_row, 0, y + 1 + full_rows, pixels_in_last_row, 1);
+    }
+  }
 }
 
 void init_device() {

@@ -19,13 +19,15 @@ size_t events_read(void *buf, off_t offset, size_t len) {
       int down = (key & 0x8000) != 0;
       int code = key & ~0x8000;
       if (code > 0 && code < 256 && keyname[code] != NULL) {
-        ev_len = snprintf(ev_buf, sizeof(ev_buf), "k%c %s\n", down ? 'd' : 'u', keyname[code]);
+        snprintf(ev_buf, sizeof(ev_buf), "k%c %s\n", down ? 'd' : 'u', keyname[code]);
       } else {
-        ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
+        snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
       }
+    ev_len = strlen(ev_buf);
     } else {
-      ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
+      snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
     }
+    ev_len = strlen(ev_buf);
   }
   if (len == 0) return 0;
   if ((size_t)offset >= ev_len) return 0;

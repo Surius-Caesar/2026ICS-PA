@@ -9,6 +9,7 @@ uintptr_t loader(_Protect *as, const char *filename) {
   
   // Get file size
   size_t size = fs_filesz(fd);
+  Log("Loader: file=%s, size=%d", filename, size);
   
   // Read file content to DEFAULT_ENTRY
   fs_read(fd, DEFAULT_ENTRY, size);
@@ -16,5 +17,6 @@ uintptr_t loader(_Protect *as, const char *filename) {
   // Close the file
   fs_close(fd);
   
+  Log("Loader: loaded %d bytes to 0x%x", size, DEFAULT_ENTRY);
   return (uintptr_t)DEFAULT_ENTRY;
 }

@@ -21,6 +21,8 @@ int NDL_OpenDisplay(int w, int h) {
   canvas = malloc(sizeof(uint32_t) * w * h);
   assert(canvas);
 
+  fprintf(stderr, "[NDL] OpenDisplay: %dx%d\n", w, h);
+
   if (getenv("NWM_APP")) {
     has_nwm = 1;
   } else {
@@ -32,12 +34,16 @@ int NDL_OpenDisplay(int w, int h) {
     evtdev = stdin;
   } else {
     get_display_info();
+    fprintf(stderr, "[NDL] Screen info: %dx%d, Canvas: %dx%d\n", screen_w, screen_h, canvas_w, canvas_h);
     assert(screen_w >= canvas_w);
     assert(screen_h >= canvas_h);
     pad_x = (screen_w - canvas_w) / 2;
     pad_y = (screen_h - canvas_h) / 2;
+    fprintf(stderr, "[NDL] Padding: (%d, %d)\n", pad_x, pad_y);
     fbdev = fopen("/dev/fb", "w"); assert(fbdev);
+    fprintf(stderr, "[NDL] fbdev opened successfully\n");
     evtdev = fopen("/dev/events", "r"); assert(evtdev);
+    fprintf(stderr, "[NDL] evtdev opened successfully\n");
   }
 }
 
@@ -68,6 +74,12 @@ int NDL_DrawRect(uint32_t *pixels, int x, int y, int w, int h) {
 }
 
 int NDL_Render() {
+  static int render_count = 0;
+  if (render_count < 5) {
+    fprintf(stderr, "[NDL] Render called (count=%d)\n", render_count);
+    render_count++;
+  }
+  
   if (has_nwm) {
     fflush(stdout);
   } else {

@@ -19,6 +19,11 @@ static uint32_t (*vmem) [SCREEN_W];
 void vga_vmem_io_handler(paddr_t addr, int len, bool is_write) {
   // Mark screen for update on every write to VRAM
   if (is_write) {
+    static int call_count = 0;
+    if (call_count < 10) {
+      printf("[VGA] Write at addr=0x%x, len=%d\n", addr, len);
+      call_count++;
+    }
     mark_screen_update();
   }
 }
@@ -38,5 +43,11 @@ void init_vga() {
       SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
 
   vmem = add_mmio_map(VMEM, 0x80000, vga_vmem_io_handler);
+  
+  // Clear VRAM to black initially
+  memset(vmem, 0, SCREEN_W * SCREEN_H * sizeof(uint32_t));
+  
+  // Force initial screen update
+  update_screen();
 }
 #endif	/* HAS_IOE */

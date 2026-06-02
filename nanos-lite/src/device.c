@@ -23,7 +23,6 @@ size_t events_read(void *buf, off_t offset, size_t len) {
       } else {
         snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
       }
-    ev_len = strlen(ev_buf);
     } else {
       snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
     }

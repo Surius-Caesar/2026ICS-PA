@@ -31,7 +31,7 @@ int main() {
   init_fs();
 
   // Load user program by filename from filesystem
-  const char *program = "/bin/text";  // Test filesystem with text program
+  const char *program = "/bin/pal";  // Run Chinese Paladin (PAL)
   Log("Loading program: %s", program);
   uint32_t entry = loader(NULL, program);
   ((void (*)(void))entry)();

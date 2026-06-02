@@ -8,14 +8,31 @@ static const char *keyname[256] __attribute__((used)) = {
   _KEYS(NAME)
 };
 
-size_t events_read(void *buf, size_t len) {
-  int key = _read_key();
-  if (key != _KEY_NONE) {
-    int down = (key & 0x8000) != 0;
-    int code = key & ~0x8000;
-    return snprintf(buf, len, "k%c %s\n", down ? 'd' : 'u', keyname[code]);
+static char ev_buf[128];
+static size_t ev_len = 0;
+
+size_t events_read(void *buf, off_t offset, size_t len) {
+  if ((size_t)offset >= ev_len) offset = 0;
+  if ((size_t)offset == 0) {
+    int key = _read_key();
+    if (key != _KEY_NONE) {
+      int down = (key & 0x8000) != 0;
+      int code = key & ~0x8000;
+      if (code > 0 && code < 256 && keyname[code] != NULL) {
+        ev_len = snprintf(ev_buf, sizeof(ev_buf), "k%c %s\n", down ? 'd' : 'u', keyname[code]);
+      } else {
+        ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
+      }
+    } else {
+      ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %lu\n", _uptime());
+    }
   }
-  return snprintf(buf, len, "t %lu\n", _uptime());
+  if (len == 0) return 0;
+  if ((size_t)offset >= ev_len) return 0;
+  size_t n = len;
+  if ((size_t)offset + n > ev_len) n = ev_len - offset;
+  memcpy(buf, ev_buf + offset, n);
+  return n;
 }
 
 static char dispinfo[128] __attribute__((used));

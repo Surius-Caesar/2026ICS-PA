@@ -8,7 +8,6 @@ typedef struct {
 
 enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB, FD_EVENTS, FD_DISPINFO, FD_NORMAL};
 
-/* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
   {"stdin (note that this is not the actual stdin)", 0, 0},
   {"stdout (note that this is not the actual stdout)", 0, 0},
@@ -21,7 +20,7 @@ static Finfo file_table[] __attribute__((used)) = {
 
 #define NR_FILES (sizeof(file_table) / sizeof(file_table[0]))
 
-size_t events_read(void *buf, size_t len);
+size_t events_read(void *buf, off_t offset, size_t len);
 size_t dispinfo_read(void *buf, off_t offset, size_t len);
 size_t fb_write(const void *buf, off_t offset, size_t len);
 
@@ -61,7 +60,8 @@ int fs_read(int fd, void *buf, size_t len) {
       return (int)n;
     }
     case FD_EVENTS: {
-      size_t n = events_read(buf, len);
+      size_t n = events_read(buf, open_offset[fd], len);
+      open_offset[fd] += n;
       return (int)n;
     }
     default: {

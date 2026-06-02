@@ -35,13 +35,15 @@ size_t events_read(void *buf, size_t len) {
     event_buf_pos = 0; // Reset position
   }
   
-  // Copy data from internal buffer to output buffer
-  int remain = event_buf_len - event_buf_pos;
-  int copy_len = (remain < (int)len) ? remain : (int)len;
-  memcpy(buf, event_buffer + event_buf_pos, copy_len);
-  event_buf_pos += copy_len;
+  // Copy only ONE character at a time to support getc()
+  // This ensures proper handling of stdio buffering
+  if (len > 0 && event_buf_pos < event_buf_len) {
+    *(char *)buf = event_buffer[event_buf_pos];
+    event_buf_pos++;
+    return 1;
+  }
   
-  return copy_len;
+  return 0;
 }
 
 static char dispinfo[128] __attribute__((used));

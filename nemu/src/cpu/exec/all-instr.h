@@ -2,6 +2,7 @@
 
 //Data move helpers used in PA2 stage2.
 make_EHelper(mov);
+make_EHelper(movs);
 make_EHelper(push);
 make_EHelper(pop);
 make_EHelper(pusha);

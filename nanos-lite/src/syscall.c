@@ -28,19 +28,8 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
   // preview[preview_len] = '\0';
   // Log("SYS_write preview=\"%s\"%s", preview, (len > 16) ? "..." : "");
 
-  if (fd == 1 || fd == 2) {
-    const char *p = (const char *)buf;
-    for (size_t i = 0; i < len; i++) {
-      _putc(p[i]);
-    }
-    return len;
-  }
-  // For other fds, try file system write
   int w = fs_write((int)fd, buf, len);
-  if (w >= 0) return (uintptr_t)w;
-
-  panic("sys_write: unsupported fd = %d", fd);
-  return -1;
+  return (uintptr_t)w;
 }
 
 static uintptr_t sys_brk(uintptr_t brk) {

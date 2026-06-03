@@ -5,6 +5,20 @@ make_EHelper(mov) {
   print_asm_template2(mov);
 }
 
+make_EHelper(movs) {
+  // MOVSB: Move byte from DS:[ESI] to ES:[EDI]
+  // Direction flag (DF) determines whether ESI/EDI increment or decrement
+  uint8_t byte = vaddr_read(cpu.esi, 1);
+  vaddr_write(cpu.edi, 1, byte);
+  
+  // Update ESI and EDI based on direction flag
+  int step = (cpu.eflags & 0x400) ? -1 : 1; // DF flag
+  cpu.esi += step;
+  cpu.edi += step;
+  
+  print_asm("movsb");
+}
+
 make_EHelper(push) {
   //Push current operand value to stack.
   rtl_push(&id_dest->val);

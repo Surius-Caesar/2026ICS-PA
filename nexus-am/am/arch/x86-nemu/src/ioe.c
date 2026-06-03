@@ -16,8 +16,8 @@ unsigned long _uptime() {
 uint32_t* const fb = (uint32_t *)0x40000;
 
 _Screen _screen = {
-  .width  = 400,
-  .height = 300,
+  .width  = 320,
+  .height = 200,
 };
 
 extern void* memcpy(void *, const void *, int);
@@ -31,6 +31,12 @@ void _draw_rect(const uint32_t *pixels, int x, int y, int w, int h) {
 }
 
 void _draw_sync() {
+  // Force screen update by triggering MMIO callback
+  // Write to the first pixel of framebuffer to force vga_vmem_io_handler to be called
+  // This ensures the screen is updated immediately after drawing
+  volatile uint32_t *fb_ptr = fb;
+  uint32_t dummy = fb_ptr[0];  // Read to prevent optimization
+  fb_ptr[0] = dummy;  // Write back to trigger MMIO callback
 }
 
 #define I8042_STATUS_PORT 0x64

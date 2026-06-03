@@ -7,8 +7,8 @@
 
 #define VMEM 0x40000
 
-#define SCREEN_H 300
-#define SCREEN_W 400
+#define SCREEN_H 200
+#define SCREEN_W 320
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
@@ -17,6 +17,10 @@ static SDL_Texture *texture;
 static uint32_t (*vmem) [SCREEN_W];
 
 void vga_vmem_io_handler(paddr_t addr, int len, bool is_write) {
+  // Mark screen for update on every write to VRAM
+  if (is_write) {
+    mark_screen_update();
+  }
 }
 
 void update_screen() {
@@ -34,5 +38,11 @@ void init_vga() {
       SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
 
   vmem = add_mmio_map(VMEM, 0x80000, vga_vmem_io_handler);
+  
+  // Clear VRAM to black initially
+  memset(vmem, 0, SCREEN_W * SCREEN_H * sizeof(uint32_t));
+  
+  // Force initial screen update
+  update_screen();
 }
 #endif	/* HAS_IOE */

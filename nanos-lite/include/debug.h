@@ -3,13 +3,20 @@
 
 #include "common.h"
 
-#define Log(format, ...) \
-  printk("\33[1;35m[%s,%d,%s] " format "\33[0m\n", \
-      __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+// Uncomment the following line to disable all Log output for better performance
+#define NDEBUG
+
+#ifdef NDEBUG
+  #define Log(format, ...) 
+#else
+  #define Log(format, ...) \
+    printk("\33[1;35m[%s,%d,%s] " format "\33[0m\n", \
+        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+#endif
 
 #define panic(format, ...) \
   do { \
-    Log("\33[1;31msystem panic: " format, ## __VA_ARGS__); \
+    printk("\33[1;31msystem panic: " format "\n\33[0m", ## __VA_ARGS__); \
     _halt(1); \
   } while (0)
 

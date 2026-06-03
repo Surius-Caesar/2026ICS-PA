@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 static int has_nwm = 0;
 static uint32_t *canvas;
@@ -21,11 +22,15 @@ int NDL_OpenDisplay(int w, int h) {
   canvas = malloc(sizeof(uint32_t) * w * h);
   assert(canvas);
 
+#if defined(__ISA_NATIVE__)
   if (getenv("NWM_APP")) {
     has_nwm = 1;
   } else {
     has_nwm = 0;
   }
+#else
+  has_nwm = 0;
+#endif
 
   if (has_nwm) {
     printf("\033[X%d;%ds", w, h); fflush(stdout);
@@ -38,6 +43,8 @@ int NDL_OpenDisplay(int w, int h) {
     pad_y = (screen_h - canvas_h) / 2;
     fbdev = fopen("/dev/fb", "w"); assert(fbdev);
     evtdev = fopen("/dev/events", "r"); assert(evtdev);
+    setvbuf(fbdev, NULL, _IONBF, 0);
+    setvbuf(evtdev, NULL, _IONBF, 0);
   }
 }
 
@@ -89,13 +96,25 @@ static const char *keys[] = {
 #define numkeys ( sizeof(keys) / sizeof(keys[0]) )
 
 int NDL_WaitEvent(NDL_Event *event) {
-  char buf[256], *p = buf, ch;
+  char buf[256];
+  int fd = fileno(evtdev);
 
   while (1) {
-    while ((ch = getc(evtdev)) != -1) {
-      *p ++ = ch;
-      assert(p - buf < sizeof(buf));
-      if (ch == '\n') break;
+    int n = 0;
+
+    while (n + 1 < (int)sizeof(buf)) {
+      int r = read(fd, buf + n, 1);
+      if (r <= 0) {
+        continue;
+      }
+      n += r;
+      if (buf[n - 1] == '\n') {
+        break;
+      }
+    }
+
+    if (n == 0 || buf[n - 1] != '\n') {
+      continue;
     }
 
     if (buf[0] == 'k') {
@@ -109,9 +128,12 @@ int NDL_WaitEvent(NDL_Event *event) {
           break;
         }
       }
-      assert(event->data >= 1 && event->data < numkeys);
-      return 0;
+      if (event->data >= 1 && event->data < numkeys) {
+        return 0;
+      }
+      continue;
     }
+
     if (buf[0] == 't') {
       int tsc;
       sscanf(buf + 2, "%d", &tsc);

@@ -19,21 +19,17 @@ update-fsimg:
 	$(MAKE) -s -C $(NAVY_HOME) ISA=$(ISA)
 
 update-ramdisk-fsimg: update-fsimg
-	$(eval FSIMG_FILES := $(shell find $(FSIMG_PATH) -type f))
-	@echo "Found $(words $(FSIMG_FILES)) files in fsimg"
+	$(eval FSIMG_FILES := $(shell find $(FSIMG_PATH) -type f | sort))
 	@for f in $(FSIMG_FILES); do \
 		if $(READELF) -h $$f 2> /dev/null > /dev/null; then \
 			$(OBJCOPY) $(OBJCOPY_FLAG) $$f; \
 		fi \
 	done
-	@echo "Merging files into ramdisk..."
-	@cat $(FSIMG_FILES) > $(RAMDISK_FILE) || (echo "ERROR: cat command failed"; exit 1)
-	@echo "Ramdisk generated: $$(wc -c < $(RAMDISK_FILE)) bytes"
+	@cat $(FSIMG_FILES) > $(RAMDISK_FILE)
 	@wc -c $(FSIMG_FILES) | grep -v 'total$$' | sed -e 's+ $(FSIMG_PATH)+ +' | awk -v sum=0 '{print "\x7b\x22" $$2 "\x22\x2c " $$1 "\x2c " sum "\x7d\x2c";sum += $$1}' > src/files.h
-	@echo "Generated files.h"
 
 src/syscall.h: $(NAVY_HOME)/libs/libos/src/syscall.h
 	cp -f $^ $@
 
 update: update-ramdisk-fsimg src/syscall.h
-	@touch src/initrd.S
+	@touch src/initrd.S src/fs.c src/files.h

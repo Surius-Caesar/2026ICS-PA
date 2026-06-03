@@ -58,6 +58,10 @@ static uintptr_t sys_lseek(uintptr_t fd, uintptr_t offset, uintptr_t whence) {
   return (uintptr_t)r;
 }
 
+static uintptr_t sys_fstat(uintptr_t fd, uintptr_t buf) {
+  return fs_fstat((int)fd, (void *)buf) == 0 ? 0 : (uintptr_t)-1;
+}
+
 _RegSet* do_syscall(_RegSet *r) {
   uintptr_t a[4];
   a[0] = SYSCALL_ARG1(r);
@@ -89,6 +93,9 @@ _RegSet* do_syscall(_RegSet *r) {
       break;
     case SYS_lseek:
       ret = sys_lseek(a[1], a[2], a[3]);
+      break;
+    case SYS_fstat:
+      ret = sys_fstat(a[1], a[2]);
       break;
     case SYS_brk:
       ret = sys_brk(a[1]);

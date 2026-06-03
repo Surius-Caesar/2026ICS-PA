@@ -65,20 +65,7 @@ off_t _lseek(int fd, off_t offset, int whence) {
 // But to pass linking, they are defined as dummy functions
 
 int _fstat(int fd, struct stat *buf) {
-  off_t cur = _lseek(fd, 0, SEEK_CUR);
-  if (cur < 0) {
-    return -1;
-  }
-  off_t size = _lseek(fd, 0, SEEK_END);
-  if (size < 0) {
-    return -1;
-  }
-  _lseek(fd, cur, SEEK_SET);
-
-  memset(buf, 0, sizeof(struct stat));
-  buf->st_size = size;
-  buf->st_mode = 0100000;  /* regular file (S_IFREG) */
-  return 0;
+  return _syscall_(SYS_fstat, fd, (uintptr_t)buf, 0);
 }
 
 int execve(const char *fname, char * const argv[], char *const envp[]) {

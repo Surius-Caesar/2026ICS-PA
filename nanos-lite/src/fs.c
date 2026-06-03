@@ -161,3 +161,26 @@ off_t fs_disk_offset(int fd) {
   }
   return file_table[fd].disk_offset;
 }
+
+int fs_fstat(int fd, void *buf) {
+  if (fd < 0 || (size_t)fd >= NR_FILES || buf == NULL) {
+    return -1;
+  }
+
+  /* Match newlib struct stat on i386 (see sys/types.h + sys/stat.h). */
+  struct {
+    int16_t st_dev;
+    uint16_t st_ino;
+    uint32_t st_mode;
+    int16_t st_nlink;
+    uint16_t st_uid;
+    uint16_t st_gid;
+    int16_t st_rdev;
+    int32_t st_size;
+  } *st = buf;
+
+  memset(st, 0, sizeof(*st));
+  st->st_size = (int32_t)file_table[fd].size;
+  st->st_mode = 0100000;
+  return 0;
+}

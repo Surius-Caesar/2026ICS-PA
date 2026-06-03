@@ -1,6 +1,5 @@
 #include "common.h"
 
-/* Uncomment these macros to enable corresponding functionality. */
 #define HAS_ASYE
 //#define HAS_PTE
 
@@ -20,18 +19,14 @@ int main() {
   Log("Build time: %s, %s", __TIME__, __DATE__);
 
   init_ramdisk();
-
   init_device();
-
 #ifdef HAS_ASYE
   Log("Initializing interrupt/exception handler...");
   init_irq();
 #endif
-
   init_fs();
 
-  // Load user program by filename from filesystem
-  const char *program = "/bin/pal";  // Run Chinese Paladin (PAL)
+  const char *program = "/bin/pal";
   Log("Loading program: %s", program);
   uint32_t entry = loader(NULL, program);
   ((void (*)(void))entry)();

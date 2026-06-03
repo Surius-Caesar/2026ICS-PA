@@ -43,17 +43,20 @@ PAL_InitUI(
 --*/
 {
    int        iSize;
+   int        nChunk;
 
-   //
-   // Load the UI sprite.
-   //
+   nChunk = PAL_MKFGetChunkCount(gpGlobals->f.fpDATA);
+   Log("PAL_InitUI: data.mkf chunks=%d (need>9)", nChunk);
+
    iSize = PAL_MKFGetChunkSize(CHUNKNUM_SPRITEUI, gpGlobals->f.fpDATA);
+   Log("PAL_InitUI: chunk9 size=%d", iSize);
    if (iSize < 0)
    {
       return -1;
    }
 
    gpSpriteUI = (LPSPRITE)calloc(1, iSize);
+   Log("PAL_InitUI: calloc(%d)=%p", iSize, gpSpriteUI);
    if (gpSpriteUI == NULL)
    {
       return -1;

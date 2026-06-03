@@ -25,9 +25,20 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
   return -1;
 }
 
-static uintptr_t sys_brk(uintptr_t brk) {
-  (void)brk;
-  return 0;
+static uintptr_t cur_brk;
+
+static uintptr_t sys_brk(uintptr_t new_brk) {
+  if (cur_brk == 0) {
+    cur_brk = 0x4100000;
+  }
+  if (new_brk == 0) {
+    return 0;
+  }
+  if (new_brk >= cur_brk && new_brk < 0x7000000) {
+    cur_brk = new_brk;
+    return 0;
+  }
+  return (uintptr_t)-1;
 }
 
 static uintptr_t sys_gettimeofday(uintptr_t tv, uintptr_t tz) {
@@ -43,13 +54,11 @@ static uintptr_t sys_gettimeofday(uintptr_t tv, uintptr_t tz) {
 
 static uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {
   const char *p = (const char *)pathname;
-  int fd = fs_open(p, (int)flags, (int)mode);
-  return (uintptr_t)fd;
+  return (uintptr_t)fs_open(p, (int)flags, (int)mode);
 }
 
 static uintptr_t sys_read(uintptr_t fd, const void *buf, size_t len) {
-  long r = (long)fs_read((int)fd, (void *)buf, len);
-  return (uintptr_t)r;
+  return (uintptr_t)fs_read((int)fd, (void *)buf, len);
 }
 
 static uintptr_t sys_close(uintptr_t fd) {
@@ -57,8 +66,7 @@ static uintptr_t sys_close(uintptr_t fd) {
 }
 
 static uintptr_t sys_lseek(uintptr_t fd, uintptr_t offset, uintptr_t whence) {
-  off_t r = fs_lseek((int)fd, (off_t)offset, (int)whence);
-  return (uintptr_t)r;
+  return (uintptr_t)fs_lseek((int)fd, (off_t)offset, (int)whence);
 }
 
 _RegSet* do_syscall(_RegSet *r) {

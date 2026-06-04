@@ -1,6 +1,7 @@
 #include "common.h"
 #include "syscall.h"
 #include "fs.h"
+#include "memory.h"
 
 //Handler for SYS_none syscall - does nothing and returns 1.
 static uintptr_t sys_none(void) {
@@ -33,8 +34,7 @@ static uintptr_t sys_write(uintptr_t fd, const void *buf, size_t len) {
 }
 
 static uintptr_t sys_brk(uintptr_t brk) {
-  (void)brk;
-  return 0;
+  return mm_brk((uint32_t)brk) == 0 ? 0 : (uintptr_t)-1;
 }
 
 static uintptr_t sys_open(uintptr_t pathname, uintptr_t flags, uintptr_t mode) {

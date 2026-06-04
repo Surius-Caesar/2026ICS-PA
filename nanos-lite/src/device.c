@@ -38,6 +38,7 @@ void fb_write(const void *buf, off_t offset, size_t len) {
   int h = 1;
 
   _draw_rect((uint32_t *)buf, x, y, w, h);
+  _draw_sync();
 }
 
 void init_device() {

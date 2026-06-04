@@ -16,6 +16,8 @@ void free_page(void *p) {
 
 /* The brk() system call handler. */
 int mm_brk(uint32_t new_brk) {
+  (void)new_brk;
+  /* PA3: no paging yet; allow user heap to grow freely. */
   return 0;
 }
 

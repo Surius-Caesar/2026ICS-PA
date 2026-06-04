@@ -26,7 +26,7 @@ int main() {
 #endif
   init_fs();
 
-  const char *program = "/bin/bmptest";
+  const char *program = "/bin/events";
   Log("Loading program: %s", program);
   uint32_t entry = loader(NULL, program);
   ((void (*)(void))entry)();

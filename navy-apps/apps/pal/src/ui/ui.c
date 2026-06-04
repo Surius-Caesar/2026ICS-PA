@@ -375,6 +375,24 @@ PAL_DeleteBox(
    free(lpBox);
 }
 
+static VOID
+PAL_MenuPollInput(
+   VOID
+)
+{
+   int i;
+
+   for (i = 0; i < 64; i++)
+   {
+      PAL_ProcessEvent();
+      if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight | kKeyUp | kKeyLeft |
+            kKeySearch | kKeyMenu))
+      {
+         return;
+      }
+   }
+}
+
 WORD
 PAL_ReadMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
@@ -449,7 +467,7 @@ PAL_ReadMenu(
             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE);
       }
 
-      PAL_ProcessEvent();
+      PAL_MenuPollInput();
 
       if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
       {

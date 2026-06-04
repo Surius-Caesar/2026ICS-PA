@@ -37,7 +37,14 @@ PAL_PollEvent(
   NDL_WaitEvent(&evt);
   
   if (evt.type == NDL_EVENT_TIMER) {
-    systime = evt.data;
+    static uint32_t last;
+    /* NEMU IOE may return 0 forever; keep time monotonic for PAL delays. */
+    if ((uint32_t)evt.data <= last) {
+      last++;
+    } else {
+      last = (uint32_t)evt.data;
+    }
+    systime = last;
   }
 
   if (evt.type == NDL_EVENT_KEYUP || evt.type == NDL_EVENT_KEYDOWN) {
@@ -85,6 +92,10 @@ uint32_t SDL_GetTicks() {
 }
 
 void SDL_Delay(uint32_t ms) {
+  uint32_t end = systime + ms;
+  while (systime < end) {
+    while (!PAL_PollEvent(NULL));
+  }
 }
 
 static uint8_t vmem[W * H];

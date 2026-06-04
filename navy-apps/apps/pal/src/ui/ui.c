@@ -444,8 +444,6 @@ PAL_ReadMenu(
 
    while (TRUE)
    {
-      DWORD         dwTime;
-
       PAL_ClearKeyState();
 
       //
@@ -457,18 +455,7 @@ PAL_ReadMenu(
             rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE);
       }
 
-      //
-      // Poll input like the in-game loop (game.c / itemmenu.c): keep reading
-      // events until a menu key arrives or one frame elapses.
-      //
-      dwTime = SDL_GetTicks() + 50;
-      do
-      {
-         PAL_ProcessEvent();
-      }
-      while (SDL_GetTicks() < dwTime &&
-         !(g_InputState.dwKeyPress & (kKeyDown | kKeyRight | kKeyUp | kKeyLeft |
-               kKeySearch | kKeyMenu)));
+      PAL_ProcessEvent();
 
       if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
       {
@@ -601,6 +588,8 @@ PAL_ReadMenu(
       {
          PAL_ClearKeyState();
       }
+
+      SDL_Delay(50);
    }
 
    return MENUITEM_VALUE_CANCELLED;

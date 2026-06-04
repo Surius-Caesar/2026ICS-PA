@@ -550,13 +550,16 @@ main_loop() {
    sdlpal_psp_init();
 #endif
    PAL_Init(wScreenWidth, wScreenHeight, fFullScreen);
-   Log("PAL_Init done");
 
    //
    // Show the trademark screen and splash screen
    //
-   /* Splash needs long timer-driven fade; skip to main menu for now. */
-   Log("PAL_GameMain enter (splash skipped)");
+   PAL_TrademarkScreen();
+   PAL_SplashScreen();
+
+   //
+   // Run the main game routine
+   //
    PAL_GameMain();
 
    //

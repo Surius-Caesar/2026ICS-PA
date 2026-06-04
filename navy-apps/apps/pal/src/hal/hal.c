@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <ndl.h>
 
-#define NR_KEYS 18
-
 #define W 320
 #define H 200
 
@@ -19,30 +17,14 @@ int
 PAL_PollEvent(
    SDL_Event *event
 )
-/*++
-  Purpose:
-
-    Poll and process one event.
-
-  Parameters:
-
-    [OUT] event - Events polled from SDL.
-
-  Return value:
-
-    Return value of PAL_PollEvent.
-
---*/
 {
   NDL_Event evt;
   NDL_WaitEvent(&evt);
-  
+
   if (evt.type == NDL_EVENT_TIMER) {
     uint32_t t = (uint32_t)evt.data;
     if (t != 0) {
       systime = t;
-    } else {
-      systime += 16;
     }
   }
 
@@ -72,6 +54,8 @@ PAL_PollEvent(
       key_state[key] = kd;
       if (kd) PAL_KeyPressHandler(key);
       else PAL_KeyReleaseHandler(key);
+    } else if (key == -1) {
+      Log("PAL unmapped scancode %d", evt.data);
     }
     return true;
   }
@@ -83,7 +67,6 @@ void SDL_WaitUntil(uint32_t tick) {
   while (systime < tick) {
     while (PAL_PollEvent(NULL));
   }
-  if (systime > tick) return;
 }
 
 uint32_t SDL_GetTicks() {
@@ -91,10 +74,7 @@ uint32_t SDL_GetTicks() {
 }
 
 void SDL_Delay(uint32_t ms) {
-  uint32_t end = systime + ms;
-  while (systime < end) {
-    while (!PAL_PollEvent(NULL));
-  }
+  (void)ms;
 }
 
 static uint8_t vmem[W * H];
@@ -129,12 +109,6 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect,
     dstrect->h = h;
   }
 
-  /* copy pixels from position (`sx', `sy') with size
-   * `w' X `h' of `src' surface to position (`dx', `dy') of
-   * `dst' surface.
-   */
-
-  //fprintf(stderr, "(%d, %d) -> (%d, %d), %d x %d\n", sx, sy, dx, dy, w, h);
   for (int i = 0; i < w; i ++)
     for (int j = 0; j < h; j ++) {
       uint8_t idx = src->pixels[(sx + i) + (sy + j) * src->w];
@@ -153,16 +127,10 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
   if(dst->w - dx < w) { w = dst->w - dx; }
   if(dst->h - dy < h) { h = dst->h - dy; }
 
-  // TODO: color is uint32_t, what about palette?
   for (int i = 0; i < w; i ++)
     for (int j = 0; j < h; j ++) {
       dst->pixels[(dx + i) + (dy + j) * dst->w] = color;
     }
-
-  /* Fill the rectangle area described by `dstrect'
-   * in surface `dst' with color `color'. If dstrect is
-   * NULL, fill the whole surface.
-   */
 }
 
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, 
@@ -174,18 +142,13 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
 
   if(s->format->palette->colors == NULL || s->format->palette->ncolors != ncolors) {
     if(s->format->palette->ncolors != ncolors && s->format->palette->colors != NULL) {
-      /* If the size of the new palette is different 
-       * from the old one, free the old one.
-       */
       free(s->format->palette->colors);
     }
 
-    /* Get new memory space to store the new palette. */
     s->format->palette->colors = malloc(sizeof(SDL_Color) * ncolors);
     assert(s->format->palette->colors);
   }
 
-  /* Set the new palette. */
   s->format->palette->ncolors = ncolors;
   memcpy(s->format->palette->colors, colors, sizeof(SDL_Color) * ncolors);
 
@@ -201,15 +164,10 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
   }
 }
 
-/* ======== The following functions are already implemented. ======== */
-
 void SDL_UpdateRect(SDL_Surface *screen, int x, int y, int w, int h) {
   assert(screen);
   assert(screen->pitch == W);
-
-  // this should always be true in NEMU-PAL
   assert(screen->flags & SDL_HWSURFACE);
-
   redraw();
 }
 
@@ -223,9 +181,6 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 
   assert(dstrect);
   if(w == dstrect->w && h == dstrect->h) {
-    /* The source rectangle and the destination rectangle
-     * are of the same size. If that is the case, there
-     * is no need to stretch, just copy. */
     SDL_Rect rect;
     rect.x = x;
     rect.y = y;
@@ -234,7 +189,6 @@ void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
     SDL_BlitSurface(src, &rect, dst, dstrect);
   }
   else {
-    /* No other case occurs in NEMU-PAL. */
     assert(0);
   }
 }
@@ -285,10 +239,6 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
     free(s);
   }
-}
-
-void hal_clear_key_state(void) {
-  memset(key_state, 0, sizeof(key_state));
 }
 
 void hal_init() {

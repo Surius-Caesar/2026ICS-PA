@@ -440,6 +440,8 @@ PAL_ReadMenu(
 
    while (TRUE)
    {
+      PAL_ClearKeyState();
+
       //
       // Redraw the selected item if needed.
       //
@@ -575,12 +577,10 @@ PAL_ReadMenu(
          }
       }
 
-      PAL_ClearKeyState();
-
       //
       // Use delay function to avoid high CPU usage.
       //
-      SDL_Delay(16);
+      SDL_Delay(50);
    }
 
    return MENUITEM_VALUE_CANCELLED;

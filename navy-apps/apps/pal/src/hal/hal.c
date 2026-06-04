@@ -287,6 +287,10 @@ void SDL_FreeSurface(SDL_Surface *s) {
   }
 }
 
+void hal_clear_key_state(void) {
+  memset(key_state, 0, sizeof(key_state));
+}
+
 void hal_init() {
   NDL_OpenDisplay(W, H);
 }

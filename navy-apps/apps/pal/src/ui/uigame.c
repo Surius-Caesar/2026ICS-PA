@@ -139,7 +139,8 @@ PAL_OpeningMenu(
    // Fade out the screen and the music
    //
    PAL_PlayMUS(0, FALSE, 1);
-   PAL_FadeOut(1);
+   VIDEO_UpdateScreen(NULL);
+   Log("PAL_OpeningMenu done, slot=%d", wItemSelected);
 
    return (INT)wItemSelected;
 }

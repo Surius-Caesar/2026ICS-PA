@@ -57,9 +57,11 @@ PAL_DrawOpeningMenuBackground(
    // ...and blit it to the screen buffer.
    //
    PAL_FBPBlitToSurface(buf, gpScreen);
+   PAL_SetPalette(0, FALSE);
    VIDEO_UpdateScreen(NULL);
 
    free(buf);
+   Log("PAL_DrawOpeningMenuBackground done");
 }
 
 INT
@@ -90,16 +92,19 @@ PAL_OpeningMenu(
       {  1,      MAINMENU_LABEL_LOADGAME,  TRUE,     PAL_XY(125, 112) }
    };
 
+   Log("PAL_OpeningMenu begin");
    //
    // Play the background music
    //
    PAL_PlayMUS(RIX_NUM_OPENINGMENU, TRUE, 1);
 
    //
-   // Draw the background
+   // Draw the background (skip slow PAL_FadeIn; set palette immediately)
    //
    PAL_DrawOpeningMenuBackground();
-   PAL_FadeIn(0, FALSE, 1);
+   PAL_SetPalette(0, FALSE);
+   VIDEO_UpdateScreen(NULL);
+   Log("PAL_OpeningMenu ready");
 
    while (TRUE)
    {

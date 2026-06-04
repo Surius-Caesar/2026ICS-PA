@@ -39,11 +39,10 @@ PAL_PollEvent(
   
   if (evt.type == NDL_EVENT_TIMER) {
     uint32_t t = (uint32_t)evt.data;
-    /* Use NEMU uptime (ms). If stuck at 0, advance ~8ms per event. */
-    if (t > systime) {
+    if (t != 0) {
       systime = t;
     } else {
-      systime += 8;
+      systime += 16;
     }
   }
 

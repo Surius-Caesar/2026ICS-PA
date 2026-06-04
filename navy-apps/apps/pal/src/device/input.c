@@ -23,6 +23,8 @@
 
 #include "main.h"
 
+void hal_clear_key_state(void);
+
 volatile PALINPUTSTATE   g_InputState;
 #ifdef PAL_HAS_JOYSTICKS
 static SDL_Joystick     *g_pJoy = NULL;
@@ -61,14 +63,12 @@ PAL_KeyPressHandler(
 	{
 
 		case K_UP:
-			Log("PAL key UP");
 			g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
 			g_InputState.dir = kDirNorth;
 			g_InputState.dwKeyPress |= kKeyUp;
 			break;
 
 		case K_DOWN:
-			Log("PAL key DOWN");
 			g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
 			g_InputState.dir = kDirSouth;
 			g_InputState.dwKeyPress |= kKeyDown;
@@ -92,7 +92,6 @@ PAL_KeyPressHandler(
 
 		case K_RETURN:
 		case K_SPACE:
-			Log("PAL key CONFIRM");
 			g_InputState.dwKeyPress |= kKeySearch;
 			break;
 
@@ -223,6 +222,7 @@ PAL_ClearKeyState(
 --*/
 {
    g_InputState.dwKeyPress = 0;
+   hal_clear_key_state();
 }
 
 VOID

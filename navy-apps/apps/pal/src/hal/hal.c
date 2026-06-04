@@ -50,12 +50,13 @@ PAL_PollEvent(
       case NDL_SCANCODE_F: key = K_f; break;
       case NDL_SCANCODE_P: key = K_p; break;
     }
-    if (key != -1 && key_state[key] != kd) {
+    if (key != -1) {
+      if (kd) {
+        PAL_KeyPressHandler(key);
+      } else {
+        PAL_KeyReleaseHandler(key);
+      }
       key_state[key] = kd;
-      if (kd) PAL_KeyPressHandler(key);
-      else PAL_KeyReleaseHandler(key);
-    } else if (key == -1) {
-      Log("PAL unmapped scancode %d", evt.data);
     }
     return true;
   }
@@ -239,6 +240,10 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
     free(s);
   }
+}
+
+void hal_clear_key_state(void) {
+  memset(key_state, 0, sizeof(key_state));
 }
 
 void hal_init() {

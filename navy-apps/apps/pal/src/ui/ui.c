@@ -440,8 +440,6 @@ PAL_ReadMenu(
 
    while (TRUE)
    {
-      PAL_ClearKeyState();
-
       //
       // Redraw the selected item if needed.
       //
@@ -497,6 +495,7 @@ PAL_ReadMenu(
          {
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
+         PAL_ClearKeyState();
       }
       else if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
       {
@@ -544,6 +543,7 @@ PAL_ReadMenu(
          {
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
+         PAL_ClearKeyState();
       }
       else if (g_InputState.dwKeyPress & kKeyMenu)
       {
@@ -561,6 +561,7 @@ PAL_ReadMenu(
                rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_INACTIVE, FALSE, TRUE);
          }
 
+         PAL_ClearKeyState();
          break;
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
@@ -575,12 +576,12 @@ PAL_ReadMenu(
 
             return rgMenuItem[wCurrentItem].wValue;
          }
+         PAL_ClearKeyState();
       }
-
-      //
-      // Use delay function to avoid high CPU usage.
-      //
-      SDL_Delay(50);
+      else if (g_InputState.dwKeyPress)
+      {
+         PAL_ClearKeyState();
+      }
    }
 
    return MENUITEM_VALUE_CANCELLED;

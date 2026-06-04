@@ -96,7 +96,8 @@ PAL_OpeningMenu(
    // Draw the background
    //
    PAL_DrawOpeningMenuBackground();
-   PAL_FadeIn(0, FALSE, 1);
+   PAL_SetPalette(0, FALSE);
+   VIDEO_UpdateScreen(NULL);
 
    while (TRUE)
    {

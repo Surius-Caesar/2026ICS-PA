@@ -23,6 +23,8 @@
 
 #include "main.h"
 
+extern void pal_clear_key_tracking(void);
+
 volatile PALINPUTSTATE   g_InputState;
 #ifdef PAL_HAS_JOYSTICKS
 static SDL_Joystick     *g_pJoy = NULL;
@@ -220,6 +222,7 @@ PAL_ClearKeyState(
 --*/
 {
    g_InputState.dwKeyPress = 0;
+   pal_clear_key_tracking();
 }
 
 VOID

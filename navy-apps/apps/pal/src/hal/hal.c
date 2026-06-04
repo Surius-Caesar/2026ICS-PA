@@ -13,6 +13,10 @@ static int key_state[128];
 void PAL_KeyPressHandler(int);
 void PAL_KeyReleaseHandler(int);
 
+void pal_clear_key_tracking(void) {
+  memset(key_state, 0, sizeof(key_state));
+}
+
 int
 PAL_PollEvent(
    SDL_Event *event

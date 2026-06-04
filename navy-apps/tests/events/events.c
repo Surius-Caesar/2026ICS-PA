@@ -1,32 +1,43 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
 
 int main() {
-  FILE *fp = fopen("/dev/events", "r");
-  if (fp == NULL) {
-    printf("fopen /dev/events failed\n");
+  int fd = open("/dev/events", O_RDONLY);
+  if (fd < 0) {
+    printf("open /dev/events failed\n");
     return 1;
   }
 
-  printf("events test: reading /dev/events (click NEMU window, then press keys)\n");
+  printf("events test: click NEMU window, then press keys\n");
+
+  char buf[256];
+  int n = 0;
 
   while (1) {
-    char buf[256];
-    char *p = buf;
-    int ch;
-
-    while ((ch = fgetc(fp)) != EOF) {
-      *p++ = (char)ch;
-      if (ch == '\n') {
-        *p = '\0';
-        break;
-      }
-    }
-
-    if (p == buf) {
+    char c;
+    ssize_t r = read(fd, &c, 1);
+    if (r < 0) {
       continue;
     }
-
-    printf("receive event: %s", buf);
+    if (r == 0) {
+      printf("read returned 0\n");
+      continue;
+    }
+    if (c == '\0') {
+      printf("read null byte (events_read bug?)\n");
+      continue;
+    }
+    buf[n++] = c;
+    if (c == '\n') {
+      buf[n] = '\0';
+      printf("receive event: %s", buf);
+      n = 0;
+    }
+    if (n >= (int)sizeof(buf) - 1) {
+      n = 0;
+    }
   }
 
   return 0;

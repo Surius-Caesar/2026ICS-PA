@@ -14,6 +14,10 @@ static char ev_buf[128];
 static size_t ev_len, ev_offset;
 
 size_t events_read(void *buf, size_t len) {
+  if (len == 0) {
+    return 0;
+  }
+
   if (ev_offset >= ev_len) {
     int key = _read_key();
     ev_offset = 0;
@@ -21,15 +25,17 @@ size_t events_read(void *buf, size_t len) {
       int keycode = key & 0x7fff;
       bool keydown = (key & 0x8000) != 0;
       if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
-        ev_len = snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
+        snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
             keydown ? "kd" : "ku", keyname[keycode]);
         Log("events_read key: %s", ev_buf);
       } else {
-        ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
+        snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
       }
     } else {
-      ev_len = snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
+      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
     }
+    /* klib snprintf may return length including '\0'; use strlen instead. */
+    ev_len = strlen(ev_buf);
   }
 
   size_t n = len;

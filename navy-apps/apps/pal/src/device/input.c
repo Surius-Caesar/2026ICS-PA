@@ -23,8 +23,6 @@
 
 #include "main.h"
 
-void hal_clear_key_state(void);
-
 volatile PALINPUTSTATE   g_InputState;
 #ifdef PAL_HAS_JOYSTICKS
 static SDL_Joystick     *g_pJoy = NULL;
@@ -223,6 +221,7 @@ PAL_ClearKeyState(
 {
    g_InputState.dwKeyPress = 0;
    hal_clear_key_state();
+   hal_consume_menu_pending();
 }
 
 VOID

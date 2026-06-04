@@ -9,9 +9,38 @@
 
 static uint32_t systime;
 static int key_state[128];
+static DWORD s_menu_pending;
 
 void PAL_KeyPressHandler(int);
 void PAL_KeyReleaseHandler(int);
+
+static void hal_mark_menu_key(int key, int kd) {
+  if (!kd) {
+    return;
+  }
+  switch (key) {
+    case K_RETURN:
+    case K_SPACE: s_menu_pending |= kKeySearch; break;
+    case K_UP:
+    case K_LEFT: s_menu_pending |= kKeyUp; break;
+    case K_DOWN:
+    case K_RIGHT: s_menu_pending |= kKeyDown; break;
+    case K_ESCAPE: s_menu_pending |= kKeyMenu; break;
+    default: break;
+  }
+}
+
+void hal_apply_menu_pending(void) {
+  g_InputState.dwKeyPress |= s_menu_pending;
+}
+
+void hal_consume_menu_pending(void) {
+  s_menu_pending = 0;
+}
+
+void hal_clear_key_state(void) {
+  memset(key_state, 0, sizeof(key_state));
+}
 
 int
 PAL_PollEvent(
@@ -53,10 +82,12 @@ PAL_PollEvent(
     if (key != -1) {
       if (kd) {
         PAL_KeyPressHandler(key);
+        hal_mark_menu_key(key, kd);
       } else {
         PAL_KeyReleaseHandler(key);
       }
       key_state[key] = kd;
+      hal_apply_menu_pending();
     }
     return true;
   }
@@ -240,10 +271,6 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
     free(s);
   }
-}
-
-void hal_clear_key_state(void) {
-  memset(key_state, 0, sizeof(key_state));
 }
 
 void hal_init() {

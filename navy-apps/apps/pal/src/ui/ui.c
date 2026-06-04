@@ -375,26 +375,6 @@ PAL_DeleteBox(
    free(lpBox);
 }
 
-static VOID
-PAL_MenuPollInput(
-   VOID
-)
-{
-   int i;
-
-   hal_apply_menu_pending();
-   for (i = 0; i < 32; i++)
-   {
-      PAL_ProcessEvent();
-      hal_apply_menu_pending();
-      if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight | kKeyUp | kKeyLeft |
-            kKeySearch | kKeyMenu))
-      {
-         return;
-      }
-   }
-}
-
 WORD
 PAL_ReadMenu(
    LPITEMCHANGED_CALLBACK    lpfnMenuItemChanged,
@@ -464,7 +444,18 @@ PAL_ReadMenu(
 
    while (TRUE)
    {
-      PAL_MenuPollInput();
+      PAL_ClearKeyState();
+
+      //
+      // Redraw the selected item if needed.
+      //
+      if (rgMenuItem[wCurrentItem].fEnabled)
+      {
+         PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
+            rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_SELECTED, FALSE, TRUE);
+      }
+
+      PAL_ProcessEvent();
 
       if (g_InputState.dwKeyPress & (kKeyDown | kKeyRight))
       {
@@ -511,7 +502,6 @@ PAL_ReadMenu(
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
          PAL_ClearKeyState();
-         hal_consume_menu_pending();
       }
       else if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
       {
@@ -560,7 +550,6 @@ PAL_ReadMenu(
             (*lpfnMenuItemChanged)(rgMenuItem[wCurrentItem].wValue);
          }
          PAL_ClearKeyState();
-         hal_consume_menu_pending();
       }
       else if (g_InputState.dwKeyPress & kKeyMenu)
       {
@@ -579,7 +568,6 @@ PAL_ReadMenu(
          }
 
          PAL_ClearKeyState();
-         hal_consume_menu_pending();
          break;
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
@@ -592,16 +580,16 @@ PAL_ReadMenu(
             PAL_DrawText(PAL_GetWord(rgMenuItem[wCurrentItem].wNumWord),
                rgMenuItem[wCurrentItem].pos, MENUITEM_COLOR_CONFIRMED, FALSE, TRUE);
 
-            hal_consume_menu_pending();
             return rgMenuItem[wCurrentItem].wValue;
          }
          PAL_ClearKeyState();
-         hal_consume_menu_pending();
       }
       else if (g_InputState.dwKeyPress)
       {
          PAL_ClearKeyState();
       }
+
+      SDL_Delay(50);
    }
 
    return MENUITEM_VALUE_CANCELLED;

@@ -13,44 +13,51 @@ char dispinfo[128] __attribute__((used));
 static char ev_buf[128];
 static size_t ev_len, ev_offset;
 
-#define KEYQ_SIZE 64
-static char keyq[KEYQ_SIZE][64];
-static size_t keyq_len[KEYQ_SIZE];
+#define KEYQ_SIZE 32
+static int keyq[KEYQ_SIZE];
 static int keyq_h, keyq_t;
 
-static void keyq_push(const char *s) {
-  size_t n = strlen(s);
+static void keyq_push(int key) {
   int next = (keyq_t + 1) % KEYQ_SIZE;
-  if (next == keyq_h) {
-    return;
+  if (next != keyq_h) {
+    keyq[keyq_t] = key;
+    keyq_t = next;
   }
-  memcpy(keyq[keyq_t], s, n + 1);
-  keyq_len[keyq_t] = n;
-  keyq_t = next;
 }
 
 static int keyq_pop(void) {
   if (keyq_h == keyq_t) {
-    return 0;
+    return _KEY_NONE;
   }
-  memcpy(ev_buf, keyq[keyq_h], keyq_len[keyq_h] + 1);
-  ev_len = keyq_len[keyq_h];
+  int key = keyq[keyq_h];
   keyq_h = (keyq_h + 1) % KEYQ_SIZE;
-  return 1;
+  return key;
 }
 
 static void keyq_drain(void) {
   int key;
   while ((key = _read_key()) != _KEY_NONE) {
+    keyq_push(key);
+  }
+}
+
+static void fill_event(void) {
+  ev_offset = 0;
+  keyq_drain();
+  int key = keyq_pop();
+  if (key != _KEY_NONE) {
     int keycode = key & 0x7fff;
     bool keydown = (key & 0x8000) != 0;
-    char tmp[64];
     if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
-      snprintf(tmp, sizeof(tmp), "%s %s\n",
+      snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
           keydown ? "kd" : "ku", keyname[keycode]);
-      keyq_push(tmp);
+    } else {
+      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
     }
+  } else {
+    snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
   }
+  ev_len = strlen(ev_buf);
 }
 
 size_t events_read(void *buf, size_t len) {
@@ -59,12 +66,7 @@ size_t events_read(void *buf, size_t len) {
   }
 
   if (ev_offset >= ev_len) {
-    ev_offset = 0;
-    keyq_drain();
-    if (!keyq_pop()) {
-      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
-      ev_len = strlen(ev_buf);
-    }
+    fill_event();
   }
 
   size_t n = len;

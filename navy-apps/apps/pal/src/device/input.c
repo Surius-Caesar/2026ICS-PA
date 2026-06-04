@@ -220,8 +220,6 @@ PAL_ClearKeyState(
 --*/
 {
    g_InputState.dwKeyPress = 0;
-   hal_clear_key_state();
-   hal_consume_menu_pending();
 }
 
 VOID

@@ -38,10 +38,6 @@ typedef struct tagPALINPUTSTATE
 
 extern volatile PALINPUTSTATE g_InputState;
 
-void hal_clear_key_state(void);
-void hal_apply_menu_pending(void);
-void hal_consume_menu_pending(void);
-
 enum PALKEY
 {
    kKeyMenu        = (1 << 0),

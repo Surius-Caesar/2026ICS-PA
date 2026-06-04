@@ -9,38 +9,9 @@
 
 static uint32_t systime;
 static int key_state[128];
-static DWORD s_menu_pending;
 
 void PAL_KeyPressHandler(int);
 void PAL_KeyReleaseHandler(int);
-
-static void hal_mark_menu_key(int key, int kd) {
-  if (!kd) {
-    return;
-  }
-  switch (key) {
-    case K_RETURN:
-    case K_SPACE: s_menu_pending |= kKeySearch; break;
-    case K_UP:
-    case K_LEFT: s_menu_pending |= kKeyUp; break;
-    case K_DOWN:
-    case K_RIGHT: s_menu_pending |= kKeyDown; break;
-    case K_ESCAPE: s_menu_pending |= kKeyMenu; break;
-    default: break;
-  }
-}
-
-void hal_apply_menu_pending(void) {
-  g_InputState.dwKeyPress |= s_menu_pending;
-}
-
-void hal_consume_menu_pending(void) {
-  s_menu_pending = 0;
-}
-
-void hal_clear_key_state(void) {
-  memset(key_state, 0, sizeof(key_state));
-}
 
 int
 PAL_PollEvent(
@@ -51,10 +22,7 @@ PAL_PollEvent(
   NDL_WaitEvent(&evt);
 
   if (evt.type == NDL_EVENT_TIMER) {
-    uint32_t t = (uint32_t)evt.data;
-    if (t != 0) {
-      systime = t;
-    }
+    systime = evt.data;
   }
 
   if (evt.type == NDL_EVENT_KEYUP || evt.type == NDL_EVENT_KEYDOWN) {
@@ -79,15 +47,10 @@ PAL_PollEvent(
       case NDL_SCANCODE_F: key = K_f; break;
       case NDL_SCANCODE_P: key = K_p; break;
     }
-    if (key != -1) {
-      if (kd) {
-        PAL_KeyPressHandler(key);
-        hal_mark_menu_key(key, kd);
-      } else {
-        PAL_KeyReleaseHandler(key);
-      }
+    if (key != -1 && key_state[key] != kd) {
       key_state[key] = kd;
-      hal_apply_menu_pending();
+      if (kd) PAL_KeyPressHandler(key);
+      else PAL_KeyReleaseHandler(key);
     }
     return true;
   }
@@ -124,7 +87,7 @@ static void redraw() {
   NDL_Render();
 }
 
-void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, 
+void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect,
     SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(dst && src);
 
@@ -165,7 +128,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     }
 }
 
-void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, 
+void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors,
     int firstcolor, int ncolors) {
   assert(s);
   assert(s->format);
@@ -203,7 +166,7 @@ void SDL_UpdateRect(SDL_Surface *screen, int x, int y, int w, int h) {
   redraw();
 }
 
-void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect, 
+void SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
     SDL_Surface *dst, SDL_Rect *dstrect) {
   assert(src && dst);
   int x = (srcrect == NULL ? 0 : srcrect->x);
@@ -264,7 +227,7 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
       free(s->format);
     }
-    
+
     if(s->pixels != NULL && s->pixels != (void*)VMEM_ADDR) {
       free(s->pixels);
     }

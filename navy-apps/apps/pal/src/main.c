@@ -555,15 +555,8 @@ main_loop() {
    //
    // Show the trademark screen and splash screen
    //
-   /* Skip trademark (needs rng.mkf); go straight to splash. */
-   Log("PAL_SplashScreen enter");
-   PAL_SplashScreen();
-   Log("PAL_SplashScreen leave");
-
-   //
-   // Run the main game routine
-   //
-   Log("PAL_GameMain enter");
+   /* Splash needs long timer-driven fade; skip to main menu for now. */
+   Log("PAL_GameMain enter (splash skipped)");
    PAL_GameMain();
 
    //

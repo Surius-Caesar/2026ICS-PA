@@ -38,14 +38,13 @@ PAL_PollEvent(
   NDL_WaitEvent(&evt);
   
   if (evt.type == NDL_EVENT_TIMER) {
-    static uint32_t last;
-    /* NEMU IOE may return 0 forever; keep time monotonic for PAL delays. */
-    if ((uint32_t)evt.data <= last) {
-      last++;
+    uint32_t t = (uint32_t)evt.data;
+    /* Use NEMU uptime (ms). If stuck at 0, advance ~8ms per event. */
+    if (t > systime) {
+      systime = t;
     } else {
-      last = (uint32_t)evt.data;
+      systime += 8;
     }
-    systime = last;
   }
 
   if (evt.type == NDL_EVENT_KEYUP || evt.type == NDL_EVENT_KEYDOWN) {
@@ -291,19 +290,4 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
 void hal_init() {
   NDL_OpenDisplay(W, H);
-  /* Debug: one solid red frame via /dev/fb (before PAL_Init). */
-  {
-    uint32_t *pixels = (uint32_t *)malloc(W * H * sizeof(uint32_t));
-    if (pixels != NULL) {
-      for (int i = 0; i < W * H; i++) {
-        pixels[i] = 0xff0000;
-      }
-      NDL_DrawRect(pixels, 0, 0, W, H);
-      NDL_Render();
-      free(pixels);
-      Log("hal: red test frame sent");
-    } else {
-      Log("hal: red test malloc failed");
-    }
-  }
 }

@@ -12,6 +12,36 @@ char dispinfo[128] __attribute__((used));
 
 static char ev_buf[128];
 static size_t ev_len, ev_offset;
+static unsigned long last_timer = (unsigned long)-1;
+
+static void fill_event(void) {
+  while (1) {
+    int key = _read_key();
+    if (key != _KEY_NONE) {
+      int keycode = key & 0x7fff;
+      bool keydown = (key & 0x8000) != 0;
+      if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
+        ev_offset = 0;
+        snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
+            keydown ? "kd" : "ku", keyname[keycode]);
+        ev_len = strlen(ev_buf);
+        return;
+      }
+      /* Bad scancode already read from hardware; skip and try next. */
+      continue;
+    }
+
+    unsigned t = (unsigned)_uptime();
+    if (t != last_timer) {
+      ev_offset = 0;
+      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", t);
+      ev_len = strlen(ev_buf);
+      last_timer = t;
+      return;
+    }
+    /* Manual: emit timer only when uptime changes; otherwise wait for key/time. */
+  }
+}
 
 size_t events_read(void *buf, size_t len) {
   if (len == 0) {
@@ -19,21 +49,7 @@ size_t events_read(void *buf, size_t len) {
   }
 
   if (ev_offset >= ev_len) {
-    int key = _read_key();
-    ev_offset = 0;
-    if (key != _KEY_NONE) {
-      int keycode = key & 0x7fff;
-      bool keydown = (key & 0x8000) != 0;
-      if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
-        snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
-            keydown ? "kd" : "ku", keyname[keycode]);
-      } else {
-        snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
-      }
-    } else {
-      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
-    }
-    ev_len = strlen(ev_buf);
+    fill_event();
   }
 
   size_t n = len;

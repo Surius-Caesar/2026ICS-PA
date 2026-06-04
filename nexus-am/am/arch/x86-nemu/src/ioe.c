@@ -33,8 +33,8 @@ void _draw_sync() {
 }
 
 int _read_key() {
-  if (inl(KBD_PORT) & 0x1) {
-    return inl(KBD_PORT + 4);
+  if (inl(KBD_PORT + 4) & 0x1) {
+    return inl(KBD_PORT);
   }
   return _KEY_NONE;
 }

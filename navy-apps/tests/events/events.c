@@ -1,27 +1,33 @@
 #include <stdio.h>
 
-int main(){
+int main() {
   FILE *fp = fopen("/dev/events", "r");
-  volatile int j = 0;
-  while(1){
-    j ++;
-    if (j == 1000000) {
-      char buf[256];
-      char *p = buf, ch;
-      while((ch = fgetc(fp)) != -1){
-        *p ++ = ch;
-        if(ch == '\n') {
-          *p = '\0';
-          break;
-        }
-      }
-
-      printf("receive event: %s", buf);
-      j = 0;
-    }
+  if (fp == NULL) {
+    printf("fopen /dev/events failed\n");
+    return 1;
   }
 
-  fclose(fp);
+  printf("events test: reading /dev/events (click NEMU window, then press keys)\n");
+
+  while (1) {
+    char buf[256];
+    char *p = buf;
+    int ch;
+
+    while ((ch = fgetc(fp)) != EOF) {
+      *p++ = (char)ch;
+      if (ch == '\n') {
+        *p = '\0';
+        break;
+      }
+    }
+
+    if (p == buf) {
+      continue;
+    }
+
+    printf("receive event: %s", buf);
+  }
+
   return 0;
 }
-

@@ -552,8 +552,7 @@ main_loop() {
    //
    // Show the trademark screen and splash screen
    //
-   // TODO: should we display these?
-   PAL_TrademarkScreen();
+   /* Skip trademark (needs rng.mkf); go straight to splash. */
    PAL_SplashScreen();
 
    //

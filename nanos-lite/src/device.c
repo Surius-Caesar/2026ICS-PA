@@ -13,29 +13,67 @@ char dispinfo[128] __attribute__((used));
 static char ev_buf[128];
 static size_t ev_len, ev_offset;
 
+#define KEYQ_SIZE 32
+static int keyq[KEYQ_SIZE];
+static int keyq_h, keyq_t;
+
+static void keyq_push(int key) {
+  int next = (keyq_t + 1) % KEYQ_SIZE;
+  if (next != keyq_h) {
+    keyq[keyq_t] = key;
+    keyq_t = next;
+  }
+}
+
+static int keyq_pop(void) {
+  if (keyq_h == keyq_t) {
+    return _KEY_NONE;
+  }
+  int key = keyq[keyq_h];
+  keyq_h = (keyq_h + 1) % KEYQ_SIZE;
+  return key;
+}
+
+static void keyq_drain_hw(void) {
+  int key;
+  while ((key = _read_key()) != _KEY_NONE) {
+    keyq_push(key);
+  }
+}
+
+static void fill_event(void) {
+  int key, got = 0;
+
+  ev_offset = 0;
+  if (keyq_h == keyq_t) {
+    keyq_drain_hw();
+  }
+
+  key = keyq_pop();
+  if (key != _KEY_NONE) {
+    int keycode = key & 0x7fff;
+    bool keydown = (key & 0x8000) != 0;
+    if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
+      snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
+          keydown ? "kd" : "ku", keyname[keycode]);
+      ev_len = strlen(ev_buf);
+      got = 1;
+    }
+  }
+
+  if (!got) {
+    snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
+    ev_len = strlen(ev_buf);
+  }
+}
+
 size_t events_read(void *buf, size_t len) {
   if (len == 0) {
     return 0;
   }
 
   if (ev_offset >= ev_len) {
-    int key, got = 0;
-    ev_offset = 0;
-    while ((key = _read_key()) != _KEY_NONE) {
-      int keycode = key & 0x7fff;
-      bool keydown = (key & 0x8000) != 0;
-      if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
-        snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
-            keydown ? "kd" : "ku", keyname[keycode]);
-        ev_len = strlen(ev_buf);
-        got = 1;
-        break;
-      }
-    }
-    if (!got) {
-      snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
-      ev_len = strlen(ev_buf);
-    }
+    fill_event();
   }
 
   size_t n = len;
@@ -52,6 +90,9 @@ void dispinfo_read(void *buf, off_t offset, size_t len) {
 }
 
 void fb_write(const void *buf, off_t offset, size_t len) {
+  /* PAL redraws during DrawText; drain keyboard here so scancodes are not lost. */
+  keyq_drain_hw();
+
   int pixel_offset = offset / 4;
   int x = pixel_offset % _screen.width;
   int y = pixel_offset / _screen.width;

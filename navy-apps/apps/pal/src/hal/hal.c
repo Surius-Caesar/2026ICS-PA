@@ -1,4 +1,5 @@
 #include "hal.h"
+#include "main.h"
 #include <string.h>
 #include <stdlib.h>
 #include <ndl.h>
@@ -290,4 +291,19 @@ void SDL_FreeSurface(SDL_Surface *s) {
 
 void hal_init() {
   NDL_OpenDisplay(W, H);
+  /* Debug: one solid red frame via /dev/fb (before PAL_Init). */
+  {
+    uint32_t *pixels = (uint32_t *)malloc(W * H * sizeof(uint32_t));
+    if (pixels != NULL) {
+      for (int i = 0; i < W * H; i++) {
+        pixels[i] = 0xff0000;
+      }
+      NDL_DrawRect(pixels, 0, 0, W, H);
+      NDL_Render();
+      free(pixels);
+      Log("hal: red test frame sent");
+    } else {
+      Log("hal: red test malloc failed");
+    }
+  }
 }

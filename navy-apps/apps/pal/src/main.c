@@ -273,10 +273,13 @@ PAL_SplashScreen(
       return;
    }
 
+   Log("PAL_SplashScreen: palette ok");
+
    //
    // Allocate all the needed memory at once for simplification
    //
    buf = (LPBYTE)UTIL_calloc(1, 320 * 200 * 2);
+   Log("PAL_SplashScreen: calloc ok");
    buf2 = (LPBYTE)(buf + 320 * 200);
    lpSpriteCrane = (LPSPRITE)buf2 + 32000;
 
@@ -547,17 +550,20 @@ main_loop() {
    sdlpal_psp_init();
 #endif
    PAL_Init(wScreenWidth, wScreenHeight, fFullScreen);
-
+   Log("PAL_Init done");
 
    //
    // Show the trademark screen and splash screen
    //
    /* Skip trademark (needs rng.mkf); go straight to splash. */
+   Log("PAL_SplashScreen enter");
    PAL_SplashScreen();
+   Log("PAL_SplashScreen leave");
 
    //
    // Run the main game routine
    //
+   Log("PAL_GameMain enter");
    PAL_GameMain();
 
    //

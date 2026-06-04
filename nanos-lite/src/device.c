@@ -27,7 +27,6 @@ size_t events_read(void *buf, size_t len) {
       if (keycode > 0 && keycode < 256 && keyname[keycode] != NULL) {
         snprintf(ev_buf, sizeof(ev_buf), "%s %s\n",
             keydown ? "kd" : "ku", keyname[keycode]);
-        Log("events_read key: %s", ev_buf);
       } else {
         snprintf(ev_buf, sizeof(ev_buf), "t %u\n", (unsigned)_uptime());
       }

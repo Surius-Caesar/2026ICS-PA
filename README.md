@@ -9,7 +9,7 @@ To initialize, run
 ```bash
 bash init.sh
 ```
-
+And the repository for ICS class in NanKai University.Finally my homework(here) get A(4.0).
 The following subprojects/components are included. Some of them are not fully implemented.
 * [NEMU](https://github.com/NJU-ProjectN/nemu)
 * [Nexus-am](https://github.com/NJU-ProjectN/nexus-am)
